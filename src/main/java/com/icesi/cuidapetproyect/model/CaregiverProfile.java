@@ -1,4 +1,4 @@
-package com.icesi.cuidapet.model;
+package com.icesi.cuidapetproyect.model;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -33,7 +33,7 @@ public class CaregiverProfile {
     @Column(name = "service_zone", length = 160)
     private String serviceZone;
 
-    @Column(name = "active_flag", nullable = false, length = 1)
+    @Column(name = "active_flag", nullable = false, columnDefinition = "CHAR(1)")
     private String activeFlag = "Y";
 
     @Column(name = "created_at", nullable = false)
@@ -43,7 +43,7 @@ public class CaregiverProfile {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "caregiver")
-    private List<CaregiverService> services = new ArrayList<>();
+    private List<com.icesi.cuidapetproyect.model.CaregiverService> services = new ArrayList<>();
 
     @OneToMany(mappedBy = "caregiver")
     private List<CaregiverAvailability> availabilities = new ArrayList<>();

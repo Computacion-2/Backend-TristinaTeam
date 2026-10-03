@@ -1,5 +1,5 @@
-package com.icesi.cuidapet.repository;
-import com.icesi.cuidapet.model.PetPhoto;
+package com.icesi.cuidapetproyect.repository;
+import com.icesi.cuidapetproyect.model.PetPhoto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 

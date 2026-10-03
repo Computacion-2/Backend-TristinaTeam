@@ -1,6 +1,6 @@
-package com.icesi.cuidapet.repository;
-import com.icesi.cuidapet.model.CaregiverService;
-import com.icesi.cuidapet.model.CaregiverServiceId;
+package com.icesi.cuidapetproyect.repository;
+import com.icesi.cuidapetproyect.model.CaregiverService;
+import com.icesi.cuidapetproyect.model.CaregiverServiceId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 

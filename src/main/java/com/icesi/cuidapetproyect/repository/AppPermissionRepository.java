@@ -1,5 +1,5 @@
-package com.icesi.cuidapet.repository;
-import com.icesi.cuidapet.model.AppPermission;
+package com.icesi.cuidapetproyect.repository;
+import com.icesi.cuidapetproyect.model.AppPermission;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 

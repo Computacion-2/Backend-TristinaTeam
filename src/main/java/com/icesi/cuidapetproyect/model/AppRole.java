@@ -1,4 +1,4 @@
-package com.icesi.cuidapet.model;
+package com.icesi.cuidapetproyect.model;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -23,17 +23,17 @@ public class AppRole {
     @Column(name = "description", length = 300)
     private String description;
 
-    @Column(name = "active_flag", nullable = false, length = 1)
+    @Column(name = "active_flag", nullable = false, columnDefinition = "CHAR(1)")
     private String activeFlag = "Y";
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "role")
-    private List<UserRole> userRoles = new ArrayList<>();
+    private List<com.icesi.cuidapetproyect.model.UserRole> userRoles = new ArrayList<>();
 
     @OneToMany(mappedBy = "role")
-    private List<RolePermission> rolePermissions = new ArrayList<>();
+    private List<com.icesi.cuidapetproyect.model.RolePermission> rolePermissions = new ArrayList<>();
 
     @PrePersist
     public void prePersist() {

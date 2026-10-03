@@ -1,6 +1,8 @@
-package com.icesi.cuidapet.model;
+package com.icesi.cuidapetproyect.model;
+
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +25,7 @@ public class ServiceType {
     @Column(name = "description", length = 400)
     private String description;
 
-    @Column(name = "active_flag", nullable = false, length = 1)
+    @Column(name = "active_flag", nullable = false, columnDefinition = "CHAR(1)")
     private String activeFlag = "Y";
 
     @Column(name = "created_at", nullable = false)

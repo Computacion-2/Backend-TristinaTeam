@@ -1,4 +1,4 @@
-package com.icesi.cuidapet.model;
+package com.icesi.cuidapetproyect.model;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -33,10 +33,10 @@ public class AppUser {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "user")
-    private List<UserRole> userRoles = new ArrayList<>();
+    private List<com.icesi.cuidapetproyect.model.UserRole> userRoles = new ArrayList<>();
 
     @OneToOne(mappedBy = "user")
-    private UserProfile profile;
+    private com.icesi.cuidapetproyect.model.UserProfile profile;
 
     @PrePersist
     public void prePersist() {

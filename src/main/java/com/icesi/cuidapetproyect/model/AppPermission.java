@@ -1,4 +1,4 @@
-package com.icesi.cuidapet.model;
+package com.icesi.cuidapetproyect.model;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -30,7 +30,7 @@ public class AppPermission {
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "permission")
-    private List<RolePermission> rolePermissions = new ArrayList<>();
+    private List<com.icesi.cuidapetproyect.model.RolePermission> rolePermissions = new ArrayList<>();
 
     @PrePersist
     public void prePersist() {

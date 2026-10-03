@@ -1,4 +1,4 @@
-package com.icesi.cuidapet.model;
+package com.icesi.cuidapetproyect.model;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.ArrayList;
@@ -19,7 +19,7 @@ public class PetSpecies {
     @Column(name = "species_name", nullable = false, unique = true, length = 80)
     private String speciesName;
 
-    @Column(name = "active_flag", nullable = false, length = 1)
+    @Column(name = "active_flag", nullable = false, columnDefinition = "CHAR(1)")
     private String activeFlag = "Y";
 
     @OneToMany(mappedBy = "species")

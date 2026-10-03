@@ -1,9 +1,10 @@
-package com.icesi.cuidapet.service;
-import com.icesi.cuidapet.model.*;
-import com.icesi.cuidapet.repository.*;
+package com.icesi.cuidapetproyect.service;
+import com.icesi.cuidapetproyect.model.*;
+import com.icesi.cuidapetproyect.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 
 @Service
@@ -137,31 +138,45 @@ public class AppUserService {
 
         findById(userId);
 
-        List<UserRole> roles =
-                userRoleRepository.findByUser_Id(userId);
-
-        // Impedir que el usuario se quede sin roles
-        if (roles.size() <= 1) {
-            throw new RuntimeException(
-                    "No se puede dejar al usuario sin roles");
-        }
-
         UserRoleId id = new UserRoleId(userId, roleId);
 
+        // Verificar que el usuario tenga ese rol
         if (!userRoleRepository.existsById(id)) {
             throw new RuntimeException(
                     "El usuario no tiene este rol");
         }
 
+        List<UserRole> roles =
+                userRoleRepository.findByUser_Id(userId);
+
+        // Impedir que se quede sin roles
+        if (roles.size() <= 1) {
+            throw new RuntimeException(
+                    "No se puede dejar al usuario sin roles");
+        }
+
         userRoleRepository.deleteById(id);
     }
 
-    // Eliminar un usuario
+
+    // Eliminar un usuario de forma lógica
     @Transactional
     public void delete(Long id) {
 
+        // Comprobar que el usuario existe
         AppUser user = findById(id);
 
-        userRepository.delete(user);
+        // Evitar eliminarlo dos veces
+        if ("DELETED".equals(user.getAccountStatus())) {
+            throw new RuntimeException(
+                    "El usuario ya está eliminado");
+        }
+
+        // Cambiar su estado sin borrar sus relaciones
+        user.setAccountStatus("DELETED");
+
+        // Guardar el cambio
+        userRepository.save(user);
     }
+
 }

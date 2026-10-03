@@ -1,4 +1,4 @@
-package com.icesi.cuidapet.model;
+package com.icesi.cuidapetproyect.model;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 public class CaregiverService {
 
     @EmbeddedId
-    private CaregiverServiceId id = new CaregiverServiceId();
+    private com.icesi.cuidapetproyect.model.CaregiverServiceId id = new com.icesi.cuidapetproyect.model.CaregiverServiceId();
 
     @ManyToOne
     @MapsId("caregiverId")
@@ -21,11 +21,11 @@ public class CaregiverService {
     @ManyToOne
     @MapsId("serviceTypeId")
     @JoinColumn(name = "service_type_id", nullable = false)
-    private ServiceType serviceType;
+    private com.icesi.cuidapetproyect.model.ServiceType serviceType;
 
     @Column(name = "base_rate", nullable = false, precision = 12, scale = 2)
     private BigDecimal baseRate;
 
-    @Column(name = "active_flag", nullable = false, length = 1)
+    @Column(name = "active_flag", nullable = false, columnDefinition = "CHAR(1)")
     private String activeFlag = "Y";
 }

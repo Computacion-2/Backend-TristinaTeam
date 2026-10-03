@@ -1,4 +1,4 @@
-package com.icesi.cuidapet.model;
+package com.icesi.cuidapetproyect.model;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
@@ -17,7 +17,7 @@ public class CaregiverAvailability {
 
     @ManyToOne
     @JoinColumn(name = "caregiver_id", nullable = false)
-    private CaregiverProfile caregiver;
+    private com.icesi.cuidapetproyect.model.CaregiverProfile caregiver;
 
     @Column(name = "day_of_week", nullable = false)
     private Integer dayOfWeek;
@@ -34,6 +34,6 @@ public class CaregiverAvailability {
     @Column(name = "valid_until")
     private LocalDate validUntil;
 
-    @Column(name = "active_flag", nullable = false, length = 1)
+    @Column(name = "active_flag", nullable = false, columnDefinition = "CHAR(1)")
     private String activeFlag = "Y";
 }

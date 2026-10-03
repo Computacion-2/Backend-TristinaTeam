@@ -1,6 +1,8 @@
-package com.icesi.cuidapet.model;
+package com.icesi.cuidapetproyect.model;
+
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDateTime;
 
 @Getter
@@ -11,7 +13,7 @@ import java.time.LocalDateTime;
 public class RolePermission {
 
     @EmbeddedId
-    private RolePermissionId id = new RolePermissionId();
+    private com.icesi.cuidapetproyect.model.RolePermissionId id = new com.icesi.cuidapetproyect.model.RolePermissionId();
 
     @ManyToOne
     @MapsId("roleId")

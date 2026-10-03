@@ -1,6 +1,7 @@
-package com.icesi.cuidapet.model;
+package com.icesi.cuidapetproyect.model;
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.math.BigDecimal;
@@ -25,7 +26,7 @@ public class Pet {
 
     @ManyToOne
     @JoinColumn(name = "species_id", nullable = false)
-    private PetSpecies species;
+    private com.icesi.cuidapetproyect.model.PetSpecies species;
 
     @Column(name = "pet_name", nullable = false, length = 100)
     private String petName;
@@ -61,7 +62,7 @@ public class Pet {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "pet")
-    private List<PetPhoto> photos = new ArrayList<>();
+    private List<com.icesi.cuidapetproyect.model.PetPhoto> photos = new ArrayList<>();
 
     @PrePersist
     public void prePersist() {

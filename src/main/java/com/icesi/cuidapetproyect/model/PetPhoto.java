@@ -1,4 +1,4 @@
-package com.icesi.cuidapet.model;
+package com.icesi.cuidapetproyect.model;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -22,7 +22,8 @@ public class PetPhoto {
     @Column(name = "photo_url", nullable = false, length = 500)
     private String photoUrl;
 
-    @Column(name = "main_photo_flag", nullable = false, length = 1)
+    @Column(name = "main_photo_flag", nullable = false,
+            columnDefinition = "CHAR(1)")
     private String mainPhotoFlag = "N";
 
     @Column(name = "uploaded_at", nullable = false)
