@@ -1,0 +1,9 @@
+package com.icesi.cuidapet.repository;
+import com.icesi.cuidapet.model.PetPhoto;
+import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.List;
+
+public interface PetPhotoRepository extends JpaRepository<PetPhoto, Long> {
+
+    List<PetPhoto> findByPet_Id(Long petId);
+}
