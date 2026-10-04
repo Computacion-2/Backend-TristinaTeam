@@ -4,6 +4,7 @@ package com.icesi.cuidapetproyect.controller;
 import com.icesi.cuidapetproyect.model.AppPermission;
 import com.icesi.cuidapetproyect.service.AppPermissionService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,13 +29,11 @@ public class AppPermissionController {
         return permissionService.findById(id);
     }
 
-    // Crear un permiso
     @PostMapping("/create")
-    public AppPermission create(@RequestBody AppPermission permission) {
+    public AppPermission create(@Valid @RequestBody AppPermission permission) {
         return permissionService.create(permission);
     }
 
-    // Actualizar un permiso
     @PostMapping("/update/{id}")
     public AppPermission update(
             @PathVariable Long id,

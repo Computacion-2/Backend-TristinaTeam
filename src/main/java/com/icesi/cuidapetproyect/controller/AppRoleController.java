@@ -4,6 +4,7 @@ package com.icesi.cuidapetproyect.controller;
 import com.icesi.cuidapetproyect.model.AppRole;
 import com.icesi.cuidapetproyect.service.AppRoleService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,17 +32,16 @@ public class AppRoleController {
     // Crear un rol con sus permisos
     @PostMapping("/create")
     public AppRole create(
-            @RequestBody AppRole role,
+            @Valid @RequestBody AppRole role,
             @RequestParam List<Long> permissionIds) {
 
         return roleService.create(role, permissionIds);
     }
 
-    // Actualizar los datos de un rol
     @PostMapping("/update/{id}")
     public AppRole update(
             @PathVariable Long id,
-            @RequestBody AppRole role) {
+            @Valid @RequestBody AppRole role) {
 
         return roleService.update(id, role);
     }

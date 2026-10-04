@@ -1,6 +1,7 @@
 package com.icesi.cuidapetproyect.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -18,9 +19,11 @@ public class AppPermission {
     @Column(name = "permission_id")
     private Long id;
 
+    @NotBlank(message = "El código del permiso es obligatorio")
     @Column(name = "permission_code", nullable = false, unique = true, length = 100)
     private String permissionCode;
 
+    @NotBlank(message = "El código del permiso es obligatorio")
     @Column(name = "permission_name", nullable = false, length = 120)
     private String permissionName;
 

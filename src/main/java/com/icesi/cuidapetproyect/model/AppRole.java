@@ -1,6 +1,7 @@
 package com.icesi.cuidapetproyect.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ public class AppRole {
     @Column(name = "role_id")
     private Long id;
 
+    @NotBlank(message = "El nombre del rol es obligatorio")
     @Column(name = "role_name", nullable = false, unique = true, length = 60)
     private String roleName;
 

@@ -1,6 +1,8 @@
 package com.icesi.cuidapetproyect.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -18,6 +20,8 @@ public class AppUser {
     @Column(name = "user_id")
     private Long id;
 
+    @NotBlank(message = "El correo es obligatorio")
+    @Email(message = "El correo no tiene un formato válido")
     @Column(name = "email", nullable = false, unique = true, length = 160)
     private String email;
 

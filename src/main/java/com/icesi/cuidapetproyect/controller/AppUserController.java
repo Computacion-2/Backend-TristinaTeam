@@ -4,6 +4,7 @@ package com.icesi.cuidapetproyect.controller;
 import com.icesi.cuidapetproyect.model.AppUser;
 import com.icesi.cuidapetproyect.service.AppUserService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,17 +32,16 @@ public class AppUserController {
     // Crear un usuario con sus roles
     @PostMapping("/create")
     public AppUser create(
-            @RequestBody AppUser user,
+            @Valid @RequestBody AppUser user,
             @RequestParam List<Long> roleIds) {
 
         return userService.create(user, roleIds);
     }
 
-    // Actualizar un usuario
     @PostMapping("/update/{id}")
     public AppUser update(
             @PathVariable Long id,
-            @RequestBody AppUser user) {
+            @Valid @RequestBody AppUser user) {
 
         return userService.update(id, user);
     }
