@@ -1,4 +1,5 @@
 package com.icesi.cuidapetproyect.model;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -29,6 +30,7 @@ public class AppPermission {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "permission")
     private List<com.icesi.cuidapetproyect.model.RolePermission> rolePermissions = new ArrayList<>();
 

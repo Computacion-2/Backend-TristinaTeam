@@ -1,6 +1,7 @@
 
 package com.icesi.cuidapetproyect.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -20,14 +21,17 @@ public class CareRequest {
     @Column(name = "request_id")
     private Long id;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "owner_id", nullable = false)
     private AppUser owner;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "pet_id", nullable = false)
     private Pet pet;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "service_type_id", nullable = false)
     private ServiceType serviceType;

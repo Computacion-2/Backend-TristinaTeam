@@ -1,6 +1,7 @@
 
 package com.icesi.cuidapetproyect.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,10 +19,12 @@ public class UserReview {
     @Column(name = "review_id")
     private Long id;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "booking_id", nullable = false)
     private CareBooking booking;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "reviewer_id", nullable = false)
     private AppUser reviewer;

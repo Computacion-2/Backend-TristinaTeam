@@ -1,4 +1,5 @@
 package com.icesi.cuidapetproyect.model;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
@@ -13,11 +14,13 @@ public class CaregiverService {
     @EmbeddedId
     private com.icesi.cuidapetproyect.model.CaregiverServiceId id = new com.icesi.cuidapetproyect.model.CaregiverServiceId();
 
+    @JsonIgnore
     @ManyToOne
     @MapsId("caregiverId")
     @JoinColumn(name = "caregiver_id", nullable = false)
     private CaregiverProfile caregiver;
 
+    @JsonIgnore
     @ManyToOne
     @MapsId("serviceTypeId")
     @JoinColumn(name = "service_type_id", nullable = false)

@@ -1,6 +1,7 @@
 
 package com.icesi.cuidapetproyect.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,18 +19,22 @@ public class IncidentReport {
     @Column(name = "report_id")
     private Long id;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "reporter_id", nullable = false)
     private AppUser reporter;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "reported_user_id", nullable = false)
     private AppUser reportedUser;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "request_id", nullable = false)
     private CareRequest request;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "booking_id")
     private CareBooking booking;

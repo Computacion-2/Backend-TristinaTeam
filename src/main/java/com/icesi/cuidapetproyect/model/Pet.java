@@ -1,4 +1,5 @@
 package com.icesi.cuidapetproyect.model;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,10 +21,13 @@ public class Pet {
     @Column(name = "pet_id")
     private Long id;
 
+
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "owner_id", nullable = false)
     private AppUser owner;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "species_id", nullable = false)
     private com.icesi.cuidapetproyect.model.PetSpecies species;

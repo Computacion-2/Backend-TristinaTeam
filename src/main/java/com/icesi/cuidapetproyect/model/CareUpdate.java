@@ -1,6 +1,7 @@
 
 package com.icesi.cuidapetproyect.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,10 +21,12 @@ public class CareUpdate {
     @Column(name = "update_id")
     private Long id;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "booking_id", nullable = false)
     private CareBooking booking;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "caregiver_id", nullable = false)
     private CaregiverProfile caregiver;

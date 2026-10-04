@@ -1,5 +1,6 @@
 package com.icesi.cuidapetproyect.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,11 +16,13 @@ public class RolePermission {
     @EmbeddedId
     private com.icesi.cuidapetproyect.model.RolePermissionId id = new com.icesi.cuidapetproyect.model.RolePermissionId();
 
+    @JsonIgnore
     @ManyToOne
     @MapsId("roleId")
     @JoinColumn(name = "role_id", nullable = false)
     private AppRole role;
 
+    @JsonIgnore
     @ManyToOne
     @MapsId("permissionId")
     @JoinColumn(name = "permission_id", nullable = false)
