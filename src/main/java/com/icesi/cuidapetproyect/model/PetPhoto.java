@@ -1,4 +1,5 @@
 package com.icesi.cuidapetproyect.model;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -15,6 +16,8 @@ public class PetPhoto {
     @Column(name = "pet_photo_id")
     private Long id;
 
+
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "pet_id", nullable = false)
     private Pet pet;

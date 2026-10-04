@@ -1,4 +1,5 @@
 package com.icesi.cuidapetproyect.model;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -13,10 +14,12 @@ public class UserRole {
     @EmbeddedId
     private UserRoleId id = new UserRoleId();
 
+    @JsonIgnore
     @ManyToOne
     @MapsId("userId")
     @JoinColumn(name = "user_id", nullable = false)
     private AppUser user;
+
 
     @ManyToOne
     @MapsId("roleId")

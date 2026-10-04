@@ -1,4 +1,5 @@
 package com.icesi.cuidapetproyect.model;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
@@ -15,6 +16,7 @@ public class CaregiverAvailability {
     @Column(name = "availability_id")
     private Long id;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "caregiver_id", nullable = false)
     private com.icesi.cuidapetproyect.model.CaregiverProfile caregiver;
