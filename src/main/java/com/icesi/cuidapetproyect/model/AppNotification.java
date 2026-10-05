@@ -1,9 +1,6 @@
-
 package com.icesi.cuidapetproyect.model;
-
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDateTime;
 
 @Getter

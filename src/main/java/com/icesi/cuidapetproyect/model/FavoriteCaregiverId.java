@@ -1,8 +1,5 @@
-
 package com.icesi.cuidapetproyect.model;
-
 import lombok.*;
-
 import java.io.Serializable;
 import java.util.Objects;
 

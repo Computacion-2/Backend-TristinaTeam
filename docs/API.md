@@ -222,3 +222,7 @@ Este script carga los permisos, roles, usuarios de prueba, especies de mascotas 
 Debe ejecutarse después del script de creación del esquema, desde una conexión de Oracle SQL Developer con el usuario de la aplicación.
 
 Los registros de usuarios del script tienen hashes ficticios y solo sirven para verificar la persistencia y las relaciones entre las entidades.
+
+
+## Video de funcionamiento
+[Ver demostración de CuidaPet](https://drive.google.com/file/d/1CuUJEpwXpszjL59R-BCdbdwqss7HutJX/view?usp=sharing)

@@ -1,5 +1,4 @@
 package com.icesi.cuidapetproyect.exception;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -9,14 +8,13 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
-
 import java.util.Map;
 import java.util.NoSuchElementException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // Cuando los datos enviados no son válidos.
+    // Cuando los datos enviados no son validos.
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, String>> badRequest(
             IllegalArgumentException ex) {
@@ -36,7 +34,7 @@ public class GlobalExceptionHandler {
                 .body(Map.of("error", ex.getMessage()));
     }
 
-    // Cuando una operación incumple una regla de negocio.
+    // Cuando una operacion incumple una regla de negocio.
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<Map<String, String>> conflict(
             IllegalStateException ex) {
@@ -53,7 +51,7 @@ public class GlobalExceptionHandler {
 
         String message = ex.getMessage();
 
-        // Evitamos devolver mensajes internos si no hay una descripción.
+        // Evitamos devolver mensajes internos si no hay una descripcion.
         if (message == null || message.isBlank()) {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -102,7 +100,7 @@ public class GlobalExceptionHandler {
                 .body(Map.of("error", "El JSON enviado no es válido"));
     }
 
-    // Parámetros obligatorios que no se enviaron.
+    // Parametros obligatorios que no se enviaron.
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<Map<String, String>> missingParameter(
             MissingServletRequestParameterException ex) {
@@ -115,7 +113,7 @@ public class GlobalExceptionHandler {
                 ));
     }
 
-    // Identificadores o parámetros con un tipo incorrecto.
+    // Identificadores o parametros con un tipo incorrecto.
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<Map<String, String>> invalidParameter(
             MethodArgumentTypeMismatchException ex) {
@@ -128,7 +126,7 @@ public class GlobalExceptionHandler {
                 ));
     }
 
-    // Maneja los errores de validación de @Valid.
+    // Maneja los errores de validacion de @Valid.
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> validationError(
             MethodArgumentNotValidException ex) {

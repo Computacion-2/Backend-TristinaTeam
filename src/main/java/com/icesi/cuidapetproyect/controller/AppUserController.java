@@ -1,13 +1,9 @@
-
 package com.icesi.cuidapetproyect.controller;
-
 import com.icesi.cuidapetproyect.model.AppUser;
 import com.icesi.cuidapetproyect.service.AppUserService;
-
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController

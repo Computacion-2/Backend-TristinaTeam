@@ -1,6 +1,4 @@
-
 package com.icesi.cuidapetproyect.model;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;

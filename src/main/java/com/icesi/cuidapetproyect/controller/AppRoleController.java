@@ -1,13 +1,9 @@
-
 package com.icesi.cuidapetproyect.controller;
-
 import com.icesi.cuidapetproyect.model.AppRole;
 import com.icesi.cuidapetproyect.service.AppRoleService;
-
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController

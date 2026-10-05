@@ -1,6 +1,4 @@
-
 package com.icesi.cuidapetproyect.controller;
-
 import com.icesi.cuidapetproyect.model.AppPermission;
 import com.icesi.cuidapetproyect.service.AppPermissionService;
 
