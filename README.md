@@ -100,3 +100,6 @@ Los usuarios cargados mediante los scripts SQL son registros de prueba y no cuen
 Las funcionalidades REST implementadas corresponden a la administración de usuarios, roles y permisos. Las demás entidades forman parte del modelo de persistencia JPA.
 
 El despliegue en IAsLab debe configurarse según los recursos y las instrucciones proporcionados para el taller.
+
+## Video de funcionamiento
+[Ver demostración de CuidaPet](https://drive.google.com/file/d/1CuUJEpwXpszjL59R-BCdbdwqss7HutJX/view?usp=sharing)
