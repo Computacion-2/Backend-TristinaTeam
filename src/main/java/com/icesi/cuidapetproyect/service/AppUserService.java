@@ -4,6 +4,8 @@ import com.icesi.cuidapetproyect.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Service
@@ -14,6 +16,7 @@ public class AppUserService {
     private final AppRoleRepository roleRepository;
     private final UserRoleRepository userRoleRepository;
     private final RolePermissionRepository rolePermissionRepository;
+    private final PasswordEncoder passwordEncoder;
 
     // Consultar todos los usuarios
     public List<AppUser> findAll() {
@@ -39,7 +42,7 @@ public class AppUserService {
 
         // No permitir correos duplicados
         if (userRepository.existsByEmail(user.getEmail())) {
-            throw new RuntimeException(
+            throw new IllegalArgumentException(
                     "El correo ya está registrado");
         }
 
@@ -63,6 +66,7 @@ public class AppUserService {
         }
 
         // Guardar el usuario
+        user.setPasswordHash(encodePassword(user.getPasswordHash()));
         AppUser savedUser = userRepository.save(user);
 
         // Asignar los roles
@@ -93,10 +97,21 @@ public class AppUserService {
         }
 
         user.setEmail(data.getEmail());
-        user.setPasswordHash(data.getPasswordHash());
+        // Una contraseña vacía conserva la actual; una nueva siempre se cifra.
+        if (data.getPasswordHash() != null && !data.getPasswordHash().isBlank()) {
+            user.setPasswordHash(encodePassword(data.getPasswordHash()));
+        }
         user.setAccountStatus(data.getAccountStatus());
 
         return userRepository.save(user);
+    }
+
+    private String encodePassword(String password) {
+        if (password == null || password.isBlank()
+                || password.getBytes(StandardCharsets.UTF_8).length > 72) {
+            throw new IllegalArgumentException("La contraseña es obligatoria y admite hasta 72 bytes UTF-8");
+        }
+        return passwordEncoder.encode(password);
     }
 
     // Asignar un rol a un usuario

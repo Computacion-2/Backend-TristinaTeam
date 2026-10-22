@@ -6,6 +6,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.Optional;
@@ -30,6 +33,9 @@ public class AppUserServiceTest {
 
     @InjectMocks
     private AppUserService userService;
+
+    @Spy
+    private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(4);
 
     private AppUser user;
     private AppRole role;
@@ -126,6 +132,7 @@ public class AppUserServiceTest {
                 userService.create(user, List.of(1L));
 
         assertNotNull(result);
+        assertTrue(passwordEncoder.matches("hash", result.getPasswordHash()));
 
         verify(userRepository).save(user);
 
@@ -260,7 +267,7 @@ public class AppUserServiceTest {
 
         AppUser result = userService.update(1L, data);
 
-        assertEquals("nuevoHash", result.getPasswordHash());
+        assertTrue(passwordEncoder.matches("nuevoHash", result.getPasswordHash()));
         verify(userRepository).save(user);
     }
 
@@ -383,6 +390,35 @@ public class AppUserServiceTest {
         verify(userRepository, never()).save(any());
     }
 
+
+    @Test
+    void updateWithoutPasswordKeepsExistingHash() {
+        AppUser data = new AppUser();
+        data.setEmail(user.getEmail());
+        data.setPasswordHash("");
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(userRepository.save(user)).thenReturn(user);
+        assertEquals("hash", userService.update(1L, data).getPasswordHash());
+        verifyNoInteractions(passwordEncoder);
+    }
+
+    @Test
+    void createRejectsMissingPassword() {
+        user.setPasswordHash(null);
+        when(roleRepository.findById(1L)).thenReturn(Optional.of(role));
+        when(rolePermissionRepository.findByRole_Id(1L)).thenReturn(List.of(new RolePermission()));
+        assertThrows(IllegalArgumentException.class, () -> userService.create(user, List.of(1L)));
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void createRejectsPasswordOverBcryptByteLimit() {
+        user.setPasswordHash("á".repeat(37));
+        when(roleRepository.findById(1L)).thenReturn(Optional.of(role));
+        when(rolePermissionRepository.findByRole_Id(1L)).thenReturn(List.of(new RolePermission()));
+        assertThrows(IllegalArgumentException.class, () -> userService.create(user, List.of(1L)));
+        verify(userRepository, never()).save(any());
+    }
 
     // No permitir eliminar dos veces al mismo usuario
     @Test
