@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Iniciar sesión | CuidaPet</title><link rel="stylesheet" th:href="@{/css/styles.css}"></head>
+<body><main class="card">
+<p class="brand">CuidaPet</p><h1>Iniciar sesión</h1><p>Ingresa con el correo de tu cuenta.</p>
+<p class="message error" th:if="${param.error}">Correo o contraseña incorrectos, o cuenta inactiva.</p>
+<p class="message" th:if="${param.logout}">Cerraste la sesión correctamente.</p>
+<p class="message" th:if="${param.registered}">Cuenta creada. Ya puedes iniciar sesión.</p>
+<form method="post" th:action="@{/login}">
+<label for="email">Correo electrónico</label><input id="email" name="email" type="email" maxlength="160" autocomplete="username" required>
+<label for="password">Contraseña</label><input id="password" name="password" type="password" autocomplete="current-password" required>
+<button type="submit">Ingresar</button>
+</form><p>¿No tienes una cuenta? <a th:href="@{/register}">Registrarse</a></p>
+</main></body></html>

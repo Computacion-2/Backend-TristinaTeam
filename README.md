@@ -1,12 +1,15 @@
 # CuidaPet Icesi
 
-Proyecto desarrollado para la asignatura Computación en Internet II. Consiste en un backend para una plataforma de cuidado de mascotas, implementado con Spring Boot, Spring Data JPA y Oracle.
+Proyecto desarrollado para la asignatura Computación en Internet II. Incluye el backend de una plataforma de cuidado de mascotas y la primera etapa del taller MVC: autenticación con Spring Security y vistas con Thymeleaf.
+
+La distribución de los nueve commits entre Juan, Valentina y Gordillo, las instrucciones de autenticación y las tareas pendientes están en [la guía del taller MVC](docs/TALLER_MVC.md). Por ahora están implementados login, registro, inicio y seguridad; las pantallas administrativas y el despliegue corresponden a las siguientes etapas.
 
 ## 1. Tecnologías utilizadas
 
 - Java 21.
 - Spring Boot 4.1.1.
 - Spring Data JPA y Hibernate.
+- Spring Security, BCrypt y Thymeleaf.
 - Oracle Database XE 21c.
 - Maven.
 - JUnit, Mockito y MockMvc.
@@ -77,11 +80,11 @@ El reporte de JaCoCo se genera en:
 
 `target/site/jacoco/index.html`
 
-Los tres servicios principales cuentan con el 100 % de cobertura de instrucciones y ramas.
+Las pruebas cubren los servicios de usuarios, roles, permisos, registro y carga de credenciales, además de reglas de acceso y formularios MVC. Consultar el reporte generado para ver la cobertura actual. La prueba contextLoads requiere la base Oracle configurada.
 
 ## 7. Funcionalidades implementadas
 
-El backend permite administrar usuarios, roles y permisos mediante sus respectivos controladores REST.
+El backend permite administrar usuarios, roles y permisos mediante sus respectivos controladores REST. Ahora estas rutas requieren sesión y los permisos MANAGE_USERS o MANAGE_ROLES. Los formularios de autenticación están en /login y /register; el registro asigna OWNER y guarda una contraseña BCrypt.
 
 Las reglas de negocio impiden crear usuarios sin roles, crear roles sin permisos y retirar el último rol o permiso asignado.
 
@@ -95,7 +98,7 @@ Las rutas, los parámetros, los ejemplos de peticiones y los códigos HTTP se en
 
 ## 9. Consideraciones
 
-Los usuarios cargados mediante los scripts SQL son registros de prueba y no cuentan con credenciales válidas para autenticación.
+Los usuarios cargados mediante los scripts SQL son registros de prueba y no cuentan con credenciales válidas para autenticación. Crear una cuenta desde /register; la guía MVC explica cómo asignarle ADMIN desde la base para la demostración.
 
 Las funcionalidades REST implementadas corresponden a la administración de usuarios, roles y permisos. Las demás entidades forman parte del modelo de persistencia JPA.
 

@@ -1,0 +1,9 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Inicio | CuidaPet</title><link rel="stylesheet" th:href="@{/css/styles.css}"></head>
+<body><main class="card">
+<p class="brand">CuidaPet</p><h1>Bienvenido</h1><p>Sesión iniciada como <strong th:text="${email}"></strong>.</p>
+<h2>Tus roles y permisos</h2><ul><li th:each="authority : ${authorities}" th:text="${authority.authority}"></li></ul>
+<p th:if="${#lists.isEmpty(authorities)}">Tu cuenta no tiene permisos asignados.</p>
+<form method="post" th:action="@{/logout}"><button type="submit">Cerrar sesión</button></form>
+</main></body></html>

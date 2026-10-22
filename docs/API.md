@@ -2,6 +2,10 @@
 
 ## 1. Descripción general
 
+Desde la primera etapa MVC, todas las rutas de esta API requieren sesión iniciada mediante `/login`. Usuarios exige `MANAGE_USERS`; roles y permisos exigen `MANAGE_ROLES`. Las operaciones POST también requieren el token CSRF de la misma sesión (encabezado `X-CSRF-TOKEN` para JSON). Los formularios Thymeleaf lo envían automáticamente con `th:action`.
+
+El campo `passwordHash` se conserva por compatibilidad en las peticiones de usuarios, pero ahora se envía la contraseña nueva sin codificar y el servicio guarda BCrypt. En una actualización, omitirlo o enviarlo vacío conserva la contraseña actual. Nunca enviar un hash como si fuera la contraseña nueva.
+
 El backend de CuidaPet está desarrollado con Spring Boot, Spring Data JPA y Oracle. Permite administrar usuarios, roles y permisos, respetando las relaciones entre estas entidades y las reglas de negocio implementadas en los servicios.
 
 La API utiliza los métodos HTTP `GET` para las consultas y `POST` para las operaciones de creación, actualización, eliminación y asignación de relaciones.
