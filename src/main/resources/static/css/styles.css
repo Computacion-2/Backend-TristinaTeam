@@ -14,3 +14,13 @@ small { display: block; margin-top: 6px; color: #52655e; }
 .message { padding: 12px; background: #e4f4e9; border-radius: 5px; }
 .error { background: #fdebea; color: #912c25; }
 @media (max-width: 480px) { .card { padding: 22px; margin: 0 auto; } }
+.wide { max-width: 1000px; }
+.table-scroll { overflow-x: auto; margin-top: 20px; }
+table { width: 100%; border-collapse: collapse; text-align: left; }
+caption { text-align: left; margin-bottom: 12px; color: #52655e; }
+th, td { padding: 12px; border-bottom: 1px solid #dbe6e2; }
+th { background: #edf5f1; }
+.inline-form { display: inline-block; margin-left: 10px; }
+.inline-form button { margin: 0; }
+.danger { background: #912c25; }
+.danger:hover { background: #6f201b; }

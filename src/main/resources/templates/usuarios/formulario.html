@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Formulario de usuario | CuidaPet</title><link rel="stylesheet" th:href="@{/css/styles.css}"></head>
+<body><main class="card">
+<p class="brand">CuidaPet</p><h1 th:text="${editing ? 'Editar usuario' : 'Crear usuario'}"></h1>
+<p class="message error" role="alert" th:if="${error}" th:text="${error}"></p>
+<form method="post" th:object="${userForm}" th:action="${editing} ? @{/usuarios/{id}/editar(id=${userId})} : @{/usuarios/crear}">
+<label for="email">Correo electrónico</label><input id="email" th:field="*{email}" type="email" maxlength="160" required>
+<label for="password">Contraseña</label><input id="password" name="password" type="password" minlength="8" maxlength="72" autocomplete="new-password" th:required="${!editing}" aria-describedby="password-help">
+<small id="password-help">Mínimo 8 caracteres si introduces una contraseña; máximo 72 bytes UTF-8. <span th:if="${editing}">Deja el campo vacío para conservar la actual.</span></small>
+<label for="accountStatus">Estado</label><select id="accountStatus" th:field="*{accountStatus}"><option value="ACTIVE">Activo</option><option value="INACTIVE">Inactivo</option><option value="SUSPENDED">Suspendido</option><option value="DELETED">Eliminado</option></select>
+<div th:unless="${editing}"><label for="roleIds">Roles iniciales</label><select id="roleIds" th:field="*{roleIds}" multiple required aria-describedby="roles-help"><option th:each="role : ${roles}" th:value="${role.id}" th:text="${role.roleName}"></option></select><small id="roles-help">Selecciona al menos un rol con permisos. Para elegir varios, mantén presionada Ctrl o Command.</small></div>
+<button type="submit">Guardar usuario</button>
+</form><p><a th:href="@{/usuarios}">Volver al listado</a></p>
+</main></body></html>

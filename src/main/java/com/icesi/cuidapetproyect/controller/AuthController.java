@@ -59,6 +59,8 @@ public class AuthController {
     public String home(Authentication authentication, Model model) {
         model.addAttribute("email", authentication.getName());
         model.addAttribute("authorities", authentication.getAuthorities());
+        model.addAttribute("canManageUsers", authentication.getAuthorities().stream()
+                .anyMatch(authority -> "MANAGE_USERS".equals(authority.getAuthority())));
         return "home";
     }
 }

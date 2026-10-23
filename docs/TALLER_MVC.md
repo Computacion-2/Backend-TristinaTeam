@@ -97,6 +97,20 @@ Comprobar manualmente:
 7. Cerrar sesión y volver a una ruta privada: debe solicitar login otra vez.
 8. Al integrar todo, probar crear y eliminar roles, asignar y quitar roles de usuarios, asociar permisos y ejecutar todas las pruebas.
 
+## Primera parte de gestión MVC de usuarios
+
+Esta parte corresponde al primer bloque asignado a Valentina. Incluye `UserMvcController`, `UserForm`, las plantillas `usuarios/lista.html` y `usuarios/formulario.html`, estilos de tabla y pruebas MVC. Reutiliza los servicios existentes; no implementa todavía la pantalla para asignar y quitar roles a usuarios existentes.
+
+Para probarla, iniciar sesión con una cuenta que tenga MANAGE_USERS y abrir el enlace Gestionar usuarios del inicio:
+
+1. `/usuarios`: listar cuentas y estados, sin mostrar contraseñas.
+2. `/usuarios/nuevo`: crear una cuenta con correo, contraseña, estado y al menos un rol inicial con permisos.
+3. `/usuarios/{id}/editar`: actualizar correo, estado y opcionalmente contraseña. Vacío conserva la contraseña anterior. Este formulario no modifica roles.
+4. El botón Eliminar envía un POST y usa la eliminación lógica existente: el usuario sigue listado con estado DELETED.
+5. Probar correo duplicado, datos inválidos, cuenta inexistente y acceso con OWNER: deben mostrarse errores o denegarse el acceso según corresponda.
+
+Las pruebas nuevas están en `UserMvcControllerTest`; ejecutar `mvn test -Dtest=UserMvcControllerTest` para esa clase o `mvn verify` para la suite completa. Todos los formularios usan `th:action` y las operaciones POST redirigen. Los roles iniciales se eligen al crear para cumplir la regla previa de al menos un rol; la gestión posterior de esos roles queda para el segundo bloque.
+
 ## Entrega final pendiente de los tres integrantes
 
 La parte de Juan no representa el taller completo. Faltan las pantallas de gestión y el despliegue efectivo. La entrega requiere el código en el repositorio de Classroom, commits reales de los tres, documentación detallada, pruebas de todos los servicios (incluyendo AuthService y AppUserDetailsService) y la aplicación funcionando en Tomcat de IAsLab. Confirmar versión de Tomcat/Jakarta y recursos del servidor antes de elegir la configuración WAR.

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Usuarios | CuidaPet</title><link rel="stylesheet" th:href="@{/css/styles.css}"></head>
+<body><main class="card wide">
+<p class="brand">CuidaPet</p><h1>Usuarios</h1>
+<nav><a th:href="@{/}">Inicio</a> · <a th:href="@{/usuarios/nuevo}">Crear usuario</a></nav>
+<p class="message" role="status" th:if="${message}" th:text="${message}"></p>
+<p class="message error" role="alert" th:if="${error}" th:text="${error}"></p>
+<p th:if="${#lists.isEmpty(users)}">Todavía no hay usuarios.</p>
+<div class="table-scroll" th:unless="${#lists.isEmpty(users)}"><table>
+<caption>Cuentas registradas. Eliminar una cuenta cambia su estado a DELETED sin borrar sus datos.</caption>
+<thead><tr><th scope="col">ID</th><th scope="col">Correo</th><th scope="col">Estado</th><th scope="col">Acciones</th></tr></thead>
+<tbody><tr th:each="user : ${users}"><td th:text="${user.id}"></td><td th:text="${user.email}"></td><td th:text="${user.accountStatus}"></td>
+<td><a th:href="@{/usuarios/{id}/editar(id=${user.id})}">Editar</a>
+<form class="inline-form" method="post" th:if="${user.accountStatus != 'DELETED'}" th:action="@{/usuarios/{id}/eliminar(id=${user.id})}"><button class="danger" type="submit">Eliminar</button></form></td>
+</tr></tbody></table></div>
+</main></body></html>

@@ -6,4 +6,5 @@
 <h2>Tus roles y permisos</h2><ul><li th:each="authority : ${authorities}" th:text="${authority.authority}"></li></ul>
 <p th:if="${#lists.isEmpty(authorities)}">Tu cuenta no tiene permisos asignados.</p>
 <form method="post" th:action="@{/logout}"><button type="submit">Cerrar sesión</button></form>
+<p th:if="${canManageUsers}"><a th:href="@{/usuarios}">Gestionar usuarios</a></p>
 </main></body></html>
