@@ -1,6 +1,8 @@
 package com.icesi.cuidapetproyect.controller;
 
 import com.icesi.cuidapetproyect.model.AppUser;
+import com.icesi.cuidapetproyect.model.AppRole;
+import java.util.List;
 import com.icesi.cuidapetproyect.service.AppRoleService;
 import com.icesi.cuidapetproyect.service.AppUserService;
 import jakarta.validation.Valid;
@@ -103,6 +105,52 @@ public class UserMvcController {
             redirect.addFlashAttribute("error", errorMessage(ex));
         }
         return "redirect:/usuarios";
+    }
+
+    @GetMapping("/{id}/roles")
+    public String roles(@PathVariable Long id, Model model, RedirectAttributes redirect) {
+        try {
+            AppUser user = userService.findById(id);
+            List<AppRole> assignedRoles = userService.findRoles(id);
+            List<Long> assignedIds = assignedRoles.stream().map(AppRole::getId).toList();
+            model.addAttribute("user", user);
+            model.addAttribute("assignedRoles", assignedRoles);
+            model.addAttribute("availableRoles", roleService.findAll().stream()
+                    .filter(role -> !assignedIds.contains(role.getId()))
+                    .toList());
+            return "usuarios/roles";
+        } catch (RuntimeException ex) {
+            redirect.addFlashAttribute("error", errorMessage(ex));
+            return "redirect:/usuarios";
+        }
+    }
+
+    @PostMapping("/{id}/roles/asignar")
+    public String assignRole(@PathVariable Long id, @RequestParam(required = false) Long roleId,
+                             RedirectAttributes redirect) {
+        if (roleId == null) {
+            redirect.addFlashAttribute("error", "Selecciona un rol");
+            return "redirect:/usuarios/" + id + "/roles";
+        }
+        try {
+            userService.assignRole(id, roleId);
+            redirect.addFlashAttribute("message", "Rol asignado correctamente");
+        } catch (RuntimeException ex) {
+            redirect.addFlashAttribute("error", errorMessage(ex));
+        }
+        return "redirect:/usuarios/" + id + "/roles";
+    }
+
+    @PostMapping("/{id}/roles/{roleId}/quitar")
+    public String removeRole(@PathVariable Long id, @PathVariable Long roleId,
+                             RedirectAttributes redirect) {
+        try {
+            userService.removeRole(id, roleId);
+            redirect.addFlashAttribute("message", "Rol retirado correctamente");
+        } catch (RuntimeException ex) {
+            redirect.addFlashAttribute("error", errorMessage(ex));
+        }
+        return "redirect:/usuarios/" + id + "/roles";
     }
 
     private void validatePassword(UserForm form, BindingResult result, boolean creating) {

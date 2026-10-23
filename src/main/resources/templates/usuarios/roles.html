@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Roles del usuario | CuidaPet</title><link rel="stylesheet" th:href="@{/css/styles.css}"></head>
+<body><main class="card wide">
+<p class="brand">CuidaPet</p><h1>Roles del usuario</h1>
+<p>Cuenta: <strong th:text="${user.email}"></strong></p>
+<p class="message" role="status" th:if="${message}" th:text="${message}"></p>
+<p class="message error" role="alert" th:if="${error}" th:text="${error}"></p>
+<h2>Roles asignados</h2>
+<p>El usuario debe conservar al menos un rol. Los cambios de permisos se aplican al cerrar y volver a iniciar sesión.</p>
+<p th:if="${#lists.isEmpty(assignedRoles)}">Este usuario no tiene roles asignados.</p>
+<div class="table-scroll" th:unless="${#lists.isEmpty(assignedRoles)}"><table>
+<thead><tr><th scope="col">Rol</th><th scope="col">Estado</th><th scope="col">Acción</th></tr></thead>
+<tbody><tr th:each="role : ${assignedRoles}"><td th:text="${role.roleName}"></td><td th:text="${role.activeFlag == 'Y' ? 'Activo' : 'Inactivo'}"></td>
+<td><form method="post" th:action="@{/usuarios/{id}/roles/{roleId}/quitar(id=${user.id},roleId=${role.id})}"><button class="danger" type="submit" th:disabled="${#lists.size(assignedRoles) <= 1}">Quitar rol</button></form></td>
+</tr></tbody></table></div>
+<h2>Asignar un rol</h2>
+<p th:if="${#lists.isEmpty(availableRoles)}">No hay otros roles disponibles.</p>
+<form method="post" th:unless="${#lists.isEmpty(availableRoles)}" th:action="@{/usuarios/{id}/roles/asignar(id=${user.id})}">
+<label for="roleId">Rol</label><select id="roleId" name="roleId" required><option value="">Selecciona un rol</option><option th:each="role : ${availableRoles}" th:value="${role.id}" th:text="${role.roleName}"></option></select>
+<small>Solo pueden asignarse roles que tengan permisos. Los roles inactivos no conceden acceso.</small>
+<button type="submit">Asignar rol</button></form>
+<p><a th:href="@{/usuarios}">Volver a usuarios</a></p>
+</main></body></html>

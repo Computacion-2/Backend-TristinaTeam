@@ -114,6 +114,15 @@ public class AppUserService {
         return passwordEncoder.encode(password);
     }
 
+    // Consultar los roles asignados para la pantalla MVC.
+    @Transactional(readOnly = true)
+    public List<AppRole> findRoles(Long userId) {
+        findById(userId);
+        return userRoleRepository.findByUser_Id(userId).stream()
+                .map(UserRole::getRole)
+                .toList();
+    }
+
     // Asignar un rol a un usuario
     @Transactional
     public void assignRole(Long userId, Long roleId) {

@@ -435,4 +435,24 @@ public class AppUserServiceTest {
         verify(userRepository, never()).save(any());
     }
 
+    @Test
+    void findRolesReturnsAssignedRoles() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        UserRole assignment = new UserRole();
+        assignment.setRole(role);
+        when(userRoleRepository.findByUser_Id(1L)).thenReturn(List.of(assignment));
+        assertEquals(List.of(role), userService.findRoles(1L));
+    }
+
+    @Test
+    void findRolesRejectsMissingUser() {
+        assertThrows(RuntimeException.class, () -> userService.findRoles(999L));
+        verifyNoInteractions(userRoleRepository);
+    }
+
+    @Test
+    void findRolesCanReturnEmptyList() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        assertTrue(userService.findRoles(1L).isEmpty());
+    }
 }

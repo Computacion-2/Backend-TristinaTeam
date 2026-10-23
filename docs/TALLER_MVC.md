@@ -111,6 +111,22 @@ Para probarla, iniciar sesión con una cuenta que tenga MANAGE_USERS y abrir el 
 
 Las pruebas nuevas están en `UserMvcControllerTest`; ejecutar `mvn test -Dtest=UserMvcControllerTest` para esa clase o `mvn verify` para la suite completa. Todos los formularios usan `th:action` y las operaciones POST redirigen. Los roles iniciales se eligen al crear para cumplir la regla previa de al menos un rol; la gestión posterior de esos roles queda para el segundo bloque.
 
+## Segunda parte de gestión MVC de usuarios
+
+El segundo bloque de Valentina añade el enlace Roles de cada fila del listado y la vista `usuarios/roles.html`. Con MANAGE_USERS se puede abrir `/usuarios/{id}/roles`, consultar las asignaciones, elegir un rol no asignado y quitar uno existente. Los controladores delegan en `findRoles`, `assignRole` y `removeRole` de AppUserService.
+
+Los POST `/usuarios/{id}/roles/asignar` (parámetro roleId) y `/usuarios/{id}/roles/{roleId}/quitar` requieren CSRF y redirigen a la pantalla de roles con un mensaje. Si la cuenta no existe, la consulta regresa al listado. Se conserva la regla del servicio de no quitar el último rol, aunque se envíe el POST directamente; además, el botón queda deshabilitado cuando solo hay uno. Los roles duplicados o sin permisos producen el mensaje de la regla existente.
+
+Comprobación manual:
+
+1. Entrar con una cuenta que tenga MANAGE_USERS y abrir Usuarios → Roles de una cuenta de prueba.
+2. Asignar un rol con permisos que todavía no tenga. Comprobar que aparece en la tabla y desaparece del selector.
+3. Con dos roles asignados, quitar uno. Comprobar que vuelve a estar disponible en el selector.
+4. Comprobar que no se puede quitar el último. Los cambios se reflejan en el acceso de la cuenta afectada cuando cierre y vuelva a iniciar sesión.
+5. Iniciar sesión como OWNER sin MANAGE_USERS e intentar abrir la misma ruta: debe denegar acceso.
+
+Las pruebas de pantalla y seguridad están en UserMvcControllerTest; las pruebas de consulta y las reglas de asignar/quitar están en AppUserServiceTest. Ejecutar `mvn verify` para verificar toda la aplicación. Este bloque no modifica las pantallas de creación de roles o permisos ni prepara el despliegue.
+
 ## Entrega final pendiente de los tres integrantes
 
 La parte de Juan no representa el taller completo. Faltan las pantallas de gestión y el despliegue efectivo. La entrega requiere el código en el repositorio de Classroom, commits reales de los tres, documentación detallada, pruebas de todos los servicios (incluyendo AuthService y AppUserDetailsService) y la aplicación funcionando en Tomcat de IAsLab. Confirmar versión de Tomcat/Jakarta y recursos del servidor antes de elegir la configuración WAR.

@@ -2,7 +2,7 @@
 
 Proyecto desarrollado para la asignatura Computación en Internet II. Incluye el backend de una plataforma de cuidado de mascotas y la primera etapa del taller MVC: autenticación con Spring Security y vistas con Thymeleaf.
 
-La distribución de los nueve commits entre Juan, Valentina y Gordillo, las instrucciones de autenticación y las tareas pendientes están en [la guía del taller MVC](docs/TALLER_MVC.md). Están implementados login, registro, inicio, seguridad y la gestión MVC de usuarios en `/usuarios`. Quedan pendientes las pantallas de asignación de roles, gestión de roles y permisos, y el despliegue.
+La distribución de los nueve commits entre Juan, Valentina y Gordillo, las instrucciones de autenticación y las tareas pendientes están en [la guía del taller MVC](docs/TALLER_MVC.md). Están implementados login, registro, inicio, seguridad, la gestión MVC de usuarios en `/usuarios` y la asignación y retirada de roles de cada usuario. Quedan pendientes las pantallas de gestión de roles y permisos, y el despliegue.
 
 ## 1. Tecnologías utilizadas
 

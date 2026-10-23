@@ -173,4 +173,95 @@ class UserMvcControllerTest {
         mvc.perform(get("/").with(user("owner").roles("OWNER")))
                 .andExpect(content().string(not(containsString("Gestionar usuarios"))));
     }
+    @Test
+    void rolesPageShowsAssignmentsAndOnlyUnassignedOptions() throws Exception {
+        AppRole owner = new AppRole();
+        owner.setId(3L);
+        owner.setRoleName("OWNER");
+        AppRole caregiver = new AppRole();
+        caregiver.setId(2L);
+        caregiver.setRoleName("CAREGIVER");
+        when(userService.findById(7L)).thenReturn(existingUser());
+        when(userService.findRoles(7L)).thenReturn(List.of(owner));
+        when(roleService.findAll()).thenReturn(List.of(owner, caregiver));
+        mvc.perform(get("/usuarios/7/roles")).andExpect(status().isOk())
+                .andExpect(view().name("usuarios/roles"))
+                .andExpect(model().attribute("availableRoles", List.of(caregiver)))
+                .andExpect(content().string(containsString("OWNER")))
+                .andExpect(content().string(containsString("CAREGIVER")))
+                .andExpect(content().string(containsString("name=\"_csrf\"")))
+                .andExpect(content().string(containsString("disabled=\"disabled\"")))
+                .andExpect(content().string(not(containsString("HASH-NUNCA-VISIBLE"))));
+    }
+
+    @Test
+    void rolesPageHandlesNoAvailableRoles() throws Exception {
+        when(userService.findById(7L)).thenReturn(existingUser());
+        mvc.perform(get("/usuarios/7/roles")).andExpect(status().isOk())
+                .andExpect(content().string(containsString("No hay otros roles disponibles")));
+    }
+
+    @Test
+    void rolesOfMissingUserRedirectToList() throws Exception {
+        when(userService.findById(99L)).thenThrow(new RuntimeException("Usuario no encontrado"));
+        mvc.perform(get("/usuarios/99/roles")).andExpect(redirectedUrl("/usuarios"))
+                .andExpect(flash().attribute("error", "Usuario no encontrado"));
+    }
+
+    @Test
+    void assignRoleDelegatesAndRedirects() throws Exception {
+        mvc.perform(post("/usuarios/7/roles/asignar").with(csrf()).param("roleId", "2"))
+                .andExpect(redirectedUrl("/usuarios/7/roles"))
+                .andExpect(flash().attribute("message", "Rol asignado correctamente"));
+        verify(userService).assignRole(7L, 2L);
+    }
+
+    @Test
+    void assigningWithoutSelectionDoesNotCallService() throws Exception {
+        mvc.perform(post("/usuarios/7/roles/asignar").with(csrf()))
+                .andExpect(redirectedUrl("/usuarios/7/roles"))
+                .andExpect(flash().attribute("error", "Selecciona un rol"));
+        verifyNoInteractions(userService);
+    }
+
+    @Test
+    void duplicateRoleShowsServiceError() throws Exception {
+        doThrow(new RuntimeException("El usuario ya tiene este rol")).when(userService).assignRole(7L, 2L);
+        mvc.perform(post("/usuarios/7/roles/asignar").with(csrf()).param("roleId", "2"))
+                .andExpect(redirectedUrl("/usuarios/7/roles"))
+                .andExpect(flash().attribute("error", "El usuario ya tiene este rol"));
+    }
+
+    @Test
+    void removeRoleDelegatesAndRedirects() throws Exception {
+        mvc.perform(post("/usuarios/7/roles/2/quitar").with(csrf()))
+                .andExpect(redirectedUrl("/usuarios/7/roles"))
+                .andExpect(flash().attribute("message", "Rol retirado correctamente"));
+        verify(userService).removeRole(7L, 2L);
+    }
+
+    @Test
+    void removingLastRoleShowsErrorEvenIfPostIsSentDirectly() throws Exception {
+        doThrow(new RuntimeException("No se puede dejar al usuario sin roles")).when(userService).removeRole(7L, 3L);
+        mvc.perform(post("/usuarios/7/roles/3/quitar").with(csrf()))
+                .andExpect(redirectedUrl("/usuarios/7/roles"))
+                .andExpect(flash().attribute("error", "No se puede dejar al usuario sin roles"));
+    }
+
+    @Test
+    void roleActionsRequirePermissionAndCsrf() throws Exception {
+        mvc.perform(get("/usuarios/7/roles").with(user("owner").roles("OWNER")))
+                .andExpect(status().isForbidden());
+        mvc.perform(post("/usuarios/7/roles/asignar").param("roleId", "2"))
+                .andExpect(status().isForbidden());
+        mvc.perform(post("/usuarios/7/roles/2/quitar"))
+                .andExpect(status().isForbidden());
+        mvc.perform(post("/usuarios/7/roles/asignar").with(csrf())
+                        .with(user("owner").roles("OWNER")).param("roleId", "2"))
+                .andExpect(status().isForbidden());
+        mvc.perform(post("/usuarios/7/roles/2/quitar").with(csrf())
+                        .with(user("owner").roles("OWNER")))
+                .andExpect(status().isForbidden());
+        verifyNoInteractions(userService);
+    }
 }

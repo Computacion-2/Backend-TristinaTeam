@@ -24,3 +24,4 @@ th { background: #edf5f1; }
 .inline-form button { margin: 0; }
 .danger { background: #912c25; }
 .danger:hover { background: #6f201b; }
+button:disabled { opacity: 0.55; cursor: not-allowed; }
