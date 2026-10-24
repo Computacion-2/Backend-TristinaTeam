@@ -127,6 +127,12 @@ Comprobación manual:
 
 Las pruebas de pantalla y seguridad están en UserMvcControllerTest; las pruebas de consulta y las reglas de asignar/quitar están en AppUserServiceTest. Ejecutar `mvn verify` para verificar toda la aplicación. Este bloque no modifica las pantallas de creación de roles o permisos ni prepara el despliegue.
 
+## Tercer bloque de Valentina
+
+El proyecto ahora genera `target/cuidapet.war`, incorpora el inicializador para Tomcat y obtiene las credenciales de Oracle mediante variables de entorno. Antes de ejecutar o probar, definir DB_PASSWORD (o TEST_DB_PASSWORD con el perfil test), siguiendo [la guía de ejecución y despliegue](DESPLIEGUE.md). Los comandos anteriores de esta guía requieren esa configuración.
+
+El perfil iaslab exige DB_URL, DB_USER y DB_PASSWORD. El WAR está preparado para verificar y desplegar con Java 21 y un contenedor compatible con Servlet 6.1, como Tomcat 11. La versión del servidor de IAsLab todavía no está confirmada: no se considera desplegado hasta comprobarla, cargar el WAR y probar la URL real. Las pantallas pendientes de Gordillo deben integrarse y volver a probarse antes de la entrega final.
+
 ## Entrega final pendiente de los tres integrantes
 
 La parte de Juan no representa el taller completo. Faltan las pantallas de gestión y el despliegue efectivo. La entrega requiere el código en el repositorio de Classroom, commits reales de los tres, documentación detallada, pruebas de todos los servicios (incluyendo AuthService y AppUserDetailsService) y la aplicación funcionando en Tomcat de IAsLab. Confirmar versión de Tomcat/Jakarta y recursos del servidor antes de elegir la configuración WAR.

@@ -46,13 +46,13 @@ La conexión local utiliza la siguiente dirección:
 
 `jdbc:oracle:thin:@localhost:1521/XEPDB1`
 
-Es necesario ajustar el usuario y la contraseña según la instalación de Oracle.
+La conexión se configura con `DB_URL`, `DB_USER` y `DB_PASSWORD`; la contraseña es obligatoria y ya no está escrita en las propiedades. Para el perfil `test` se utilizan `TEST_DB_URL`, `TEST_DB_USER` y `TEST_DB_PASSWORD`. Los pasos para definirlas están en [ejecución y despliegue](docs/DESPLIEGUE.md).
 
 ## 5. Ejecución del proyecto
 
 Abrir el proyecto en IntelliJ IDEA y comprobar que esté configurado para utilizar Java 21.
 
-Desde una terminal ubicada en la raíz del proyecto, ejecutar:
+Desde una terminal ubicada en la raíz del proyecto, definir primero las variables de Oracle siguiendo [la guía de ejecución](docs/DESPLIEGUE.md) y ejecutar:
 
 ```powershell
 .\mvnw.cmd spring-boot:run
@@ -102,7 +102,7 @@ Los usuarios cargados mediante los scripts SQL son registros de prueba y no cuen
 
 Las funcionalidades REST implementadas corresponden a la administración de usuarios, roles y permisos. Las demás entidades forman parte del modelo de persistencia JPA.
 
-El despliegue en IAsLab debe configurarse según los recursos y las instrucciones proporcionados para el taller.
+El proyecto genera `target/cuidapet.war` con `clean verify` y dispone del perfil `iaslab`. La preparación del WAR está implementada; el despliegue real sigue pendiente de confirmar Java y Tomcat en el laboratorio. Ver [la guía de despliegue](docs/DESPLIEGUE.md) antes de cargarlo al servidor.
 
 ## Video de funcionamiento
 [Ver demostración de CuidaPet](https://drive.google.com/file/d/1CuUJEpwXpszjL59R-BCdbdwqss7HutJX/view?usp=sharing)

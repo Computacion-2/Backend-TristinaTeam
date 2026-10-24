@@ -121,4 +121,14 @@ class AuthControllerSecurityTest {
         mvc.perform(post("/logout").with(csrf()).with(user("owner")))
                 .andExpect(redirectedUrl("/login?logout")).andExpect(unauthenticated());
     }
+    @Test
+    void loginWorksUnderWarContextPath() throws Exception {
+        mvc.perform(get("/cuidapet/login").contextPath("/cuidapet"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("/cuidapet/css/styles.css")))
+                .andExpect(content().string(containsString("action=\"/cuidapet/login\"")))
+                .andExpect(content().string(containsString("href=\"/cuidapet/register\"")));
+        mvc.perform(get("/cuidapet/users").contextPath("/cuidapet"))
+                .andExpect(redirectedUrl("/cuidapet/login"));
+    }
 }

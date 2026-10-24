@@ -15,6 +15,7 @@
     <groupId>com.icesi</groupId>
     <artifactId>CuidaPetProyect</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+    <packaging>war</packaging>
     <name>CuidaPetProyect</name>
     <description>CuidaPetProyect</description>
 
@@ -23,6 +24,13 @@
     </properties>
 
     <dependencies>
+
+        <!-- El Tomcat del servidor aporta estas clases al desplegar el WAR. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+            <scope>provided</scope>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -89,6 +97,7 @@
     </dependencies>
 
     <build>
+        <finalName>cuidapet</finalName>
         <plugins>
 
             <!-- Carga Mockito al iniciar Java, sin adjuntar agentes durante las pruebas. -->
