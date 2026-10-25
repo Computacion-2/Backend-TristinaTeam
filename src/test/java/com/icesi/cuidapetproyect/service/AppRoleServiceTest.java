@@ -442,6 +442,7 @@ public class AppRoleServiceTest {
 
         AppRole data = new AppRole();
         data.setRoleName("PET_SITTER");
+        data.setActiveFlag(null);
 
         when(roleRepository.findById(1L))
                 .thenReturn(Optional.of(role));
