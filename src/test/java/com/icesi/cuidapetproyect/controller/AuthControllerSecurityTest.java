@@ -17,6 +17,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.*;
@@ -121,6 +122,21 @@ class AuthControllerSecurityTest {
         mvc.perform(post("/logout").with(csrf()).with(user("owner")))
                 .andExpect(redirectedUrl("/login?logout")).andExpect(unauthenticated());
     }
+    @Test
+    void homeShowsAdministrationLinksAccordingToPermissions() throws Exception {
+        mvc.perform(get("/").with(user("admin").authorities(
+                        new SimpleGrantedAuthority("MANAGE_USERS"), new SimpleGrantedAuthority("MANAGE_ROLES"))))
+                .andExpect(content().string(containsString("href=\"/usuarios\"")))
+                .andExpect(content().string(containsString("href=\"/roles\"")))
+                .andExpect(content().string(containsString("href=\"/permisos\"")));
+        mvc.perform(get("/").with(user("roles").authorities(new SimpleGrantedAuthority("MANAGE_ROLES"))))
+                .andExpect(content().string(containsString("href=\"/roles\"")))
+                .andExpect(content().string(not(containsString("href=\"/usuarios\""))));
+        mvc.perform(get("/").with(user("owner").roles("OWNER")))
+                .andExpect(content().string(not(containsString("Administración"))))
+                .andExpect(content().string(not(containsString("href=\"/roles\""))));
+    }
+
     @Test
     void loginWorksUnderWarContextPath() throws Exception {
         mvc.perform(get("/cuidapet/login").contextPath("/cuidapet"))

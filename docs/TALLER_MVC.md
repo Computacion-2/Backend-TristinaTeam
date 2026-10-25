@@ -24,14 +24,14 @@ La carga de Juan es mayor en seguridad; Valentina combina usuarios con preparaci
 - GET carga datos en Model y devuelve el nombre de la plantilla. POST llama al servicio y devuelve redirect:, incluso si ocurre un error de validación; usar RedirectAttributes para el mensaje.
 - Todos los formularios POST usan th:action, incluyendo eliminar, asignar, quitar y cerrar sesión. No desactivar CSRF.
 - Todas las vistas usan /css/styles.css. Pueden ampliar este archivo para tablas y formularios.
-- /users y /usuarios requieren MANAGE_USERS. /roles, /permissions y /permisos requieren MANAGE_ROLES, incluyendo subrutas. Si agregan otra ruta administrativa, añadir su regla explícita y una prueba de rechazo sin permiso.
+- /users y /usuarios requieren MANAGE_USERS. /roles, /permisos, /api/roles y /api/permissions requieren MANAGE_ROLES, incluyendo subrutas. Si agregan otra ruta administrativa, añadir su regla explícita y una prueba de rechazo sin permiso.
 - Para ocultar un enlace, enviar al Model un booleano obtenido de Authentication.getAuthorities(); usar th:if. Esto complementa las reglas del servidor, nunca las reemplaza.
 - La API de usuarios mantiene passwordHash como nombre del campo por compatibilidad, pero recibe la contraseña nueva sin codificar; AppUserService aplica BCrypt. En update, null o vacío conserva la contraseña existente. No enviar de vuelta el hash ni precodificarlo.
 - El registro público no recibe IDs de roles ni estado. Siempre crea una cuenta ACTIVE con OWNER. No permitir autoasignarse ADMIN.
 - Los roles inactivos no aportan autoridades. Los usuarios que no estén ACTIVE no pueden iniciar sesión.
 - Los cambios de roles/permisos se reflejan al cerrar y volver a iniciar sesión: las autoridades se cargan durante el login.
 - Las reglas previas se mantienen: al menos un rol por usuario y al menos un permiso por rol. Mostrar errores de negocio en la vista; no eliminar estas validaciones para facilitar un formulario.
-- No añadir enlaces a pantallas aún sin implementar. El inicio actual muestra la cuenta y sus autoridades; cada compañero agrega sus enlaces cuando tenga listas las vistas.
+- El inicio muestra la cuenta, sus autoridades y los enlaces de administración que correspondan a MANAGE_USERS y MANAGE_ROLES.
 
 ## Cómo ejecutar la parte de Juan
 
@@ -72,7 +72,7 @@ WHERE u.EMAIL = 'correo-registrado@icesi.edu.co'
 COMMIT;
 ```
 
-Los datos iniciales de ADMIN incluyen MANAGE_USERS y MANAGE_ROLES. Cerrar sesión e iniciar de nuevo después de asignar el rol. Durante esta primera etapa /users, /roles y /permissions todavía son respuestas JSON del taller anterior, no pantallas MVC.
+Los datos iniciales de ADMIN incluyen MANAGE_USERS y MANAGE_ROLES. Cerrar sesión e iniciar de nuevo después de asignar el rol. En el inicio aparecerán los enlaces para gestionar usuarios, roles y permisos.
 
 ## Pruebas y comprobación manual
 
@@ -92,8 +92,8 @@ Comprobar manualmente:
 2. Registrar una cuenta válida; revisar que PASSWORD_HASH contiene un hash BCrypt, nunca la contraseña original.
 3. Repetir el correo, usar correo inválido o contraseña corta: mensaje de error y redirección a registro, sin conservar la contraseña en el formulario.
 4. Probar contraseña equivocada y cuenta DELETED: no deben iniciar sesión.
-5. Con OWNER, abrir /users, /roles o /permissions: debe negar acceso.
-6. Con permisos de administración, las API actuales permiten consultar; las futuras pantallas deben respetar las mismas reglas.
+5. Con OWNER, abrir /usuarios, /roles, /permisos o la API REST: debe negar acceso.
+6. Con permisos de administración, las pantallas y la API REST aplican las mismas reglas.
 7. Cerrar sesión y volver a una ruta privada: debe solicitar login otra vez.
 8. Al integrar todo, probar crear y eliminar roles, asignar y quitar roles de usuarios, asociar permisos y ejecutar todas las pruebas.
 
@@ -143,3 +143,36 @@ Trabajar en orden: Juan termina y publica sus commits; Valentina hace git pull y
 ## Verificación de la primera etapa
 
 El 22 de octubre de 2026 se ejecutó `mvn -o verify` con Java 21 y la base Oracle local configurada: 129 pruebas, 0 fallos, 0 errores y 0 omitidas; BUILD SUCCESS. Incluye el arranque del contexto con Oracle, los servicios del taller anterior, la autenticación, los formularios Thymeleaf, CSRF y las reglas de autorización. También se generaron el JAR y el reporte JaCoCo. Esta comprobación no equivale al despliegue en IAsLab ni sustituye las pruebas de las futuras pantallas de gestión.
+
+## Gestión MVC de permisos y roles
+
+Esta parte corresponde a los tres bloques de Gordillo. Todas las rutas exigen MANAGE_ROLES; los formularios usan `th:action` y cada POST redirige con un mensaje.
+
+Permisos (`PermissionMvcController`, plantillas `permisos/lista.html` y `permisos/formulario.html`):
+
+1. `/permisos`: listar código, nombre y descripción.
+2. `/permisos/nuevo`: crear un permiso. El código se guarda en mayúsculas, debe ser único y no se puede editar después, porque es la autoridad que evalúa Spring Security.
+3. `/permisos/{id}/editar`: cambiar nombre y descripción.
+4. Eliminar: se rechaza si algún rol quedaría sin permisos. MANAGE_USERS y MANAGE_ROLES no se pueden eliminar.
+
+Roles (`RoleMvcController`, plantillas `roles/lista.html`, `roles/formulario.html` y `roles/permisos.html`):
+
+1. `/roles`: listar roles con su estado.
+2. `/roles/nuevo`: crear un rol con nombre, descripción, estado y al menos un permiso inicial.
+3. `/roles/{id}/editar`: cambiar nombre, descripción y estado.
+4. Eliminar: solo roles que no estén asignados a usuarios.
+5. `/roles/{id}/permisos`: consultar los permisos del rol, asignar uno que no tenga y quitar uno existente. El rol debe conservar al menos un permiso.
+
+ADMIN y OWNER son roles del sistema: no se pueden renombrar, desactivar ni eliminar. ADMIN conserva MANAGE_USERS y MANAGE_ROLES. Estas reglas evitan que el módulo quede sin administrador y que el registro público falle por falta del rol OWNER. La API REST anterior pasó a `/api/roles` y `/api/permissions`.
+
+Comprobación manual con una cuenta ADMIN:
+
+1. En el inicio aparecen Gestionar usuarios, Gestionar roles y Gestionar permisos.
+2. Crear el permiso `view_reports`: se guarda como VIEW_REPORTS. Repetir el código debe mostrar un error.
+3. Crear el rol PET_WALKER con VIEW_REPORTS. Desde Permisos del rol, asignarle CREATE_REQUEST y quitarle VIEW_REPORTS; el último permiso no se puede quitar.
+4. Asignar PET_WALKER a un usuario desde Usuarios → Roles, cerrar sesión con ese usuario y volver a entrar: sus autoridades incluyen ROLE_PET_WALKER y CREATE_REQUEST.
+5. Intentar eliminar PET_WALKER mientras está asignado: debe rechazarse. Quitárselo al usuario y eliminarlo.
+6. Intentar desactivar ADMIN o quitarle MANAGE_ROLES: debe rechazarse.
+7. Con una cuenta OWNER, abrir /roles o /permisos: debe mostrarse acceso denegado.
+
+Las pruebas están en `PermissionMvcControllerTest`, `RoleMvcControllerTest`, `AppPermissionServiceTest` y `AppRoleServiceTest`. Ejecutar `mvn clean verify` con Oracle configurado para la suite completa.

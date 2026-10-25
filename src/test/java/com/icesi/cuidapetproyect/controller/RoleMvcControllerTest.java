@@ -209,4 +209,91 @@ class RoleMvcControllerTest {
                 .andExpect(status().isForbidden());
         verifyNoInteractions(roleService, permissionService);
     }
+
+    @Test
+    void permissionsPageShowsAssignedAndOnlyAvailableOptions() throws Exception {
+        AppPermission createRequest = permission(3L, "CREATE_REQUEST");
+        AppPermission viewReports = permission(5L, "VIEW_REPORTS");
+        when(roleService.findById(4L)).thenReturn(role(4L, "PET_WALKER"));
+        when(roleService.findPermissions(4L)).thenReturn(List.of(createRequest));
+        when(permissionService.findAll()).thenReturn(List.of(createRequest, viewReports));
+        mvc.perform(get("/roles/4/permisos")).andExpect(status().isOk())
+                .andExpect(view().name("roles/permisos"))
+                .andExpect(model().attribute("availablePermissions", List.of(viewReports)))
+                .andExpect(content().string(containsString("CREATE_REQUEST")))
+                .andExpect(content().string(containsString("VIEW_REPORTS")))
+                .andExpect(content().string(containsString("/roles/4/permisos/3/quitar")))
+                .andExpect(content().string(containsString("/roles/4/permisos/asignar")))
+                .andExpect(content().string(containsString("disabled=\"disabled\"")))
+                .andExpect(content().string(containsString("name=\"_csrf\"")));
+    }
+
+    @Test
+    void permissionsPageHandlesNoAvailablePermissions() throws Exception {
+        when(roleService.findById(4L)).thenReturn(role(4L, "PET_WALKER"));
+        mvc.perform(get("/roles/4/permisos")).andExpect(status().isOk())
+                .andExpect(content().string(containsString("No hay otros permisos disponibles")));
+    }
+
+    @Test
+    void permissionsOfMissingRoleRedirectToList() throws Exception {
+        when(roleService.findById(99L)).thenThrow(new RuntimeException("Rol no encontrado"));
+        mvc.perform(get("/roles/99/permisos")).andExpect(redirectedUrl("/roles"))
+                .andExpect(flash().attribute("error", "Rol no encontrado"));
+    }
+
+    @Test
+    void assignPermissionDelegatesAndRedirects() throws Exception {
+        mvc.perform(post("/roles/4/permisos/asignar").with(csrf()).param("permissionId", "5"))
+                .andExpect(redirectedUrl("/roles/4/permisos"))
+                .andExpect(flash().attribute("message", "Permiso asignado correctamente"));
+        verify(roleService).assignPermission(4L, 5L);
+    }
+
+    @Test
+    void assigningWithoutSelectionDoesNotCallService() throws Exception {
+        mvc.perform(post("/roles/4/permisos/asignar").with(csrf()))
+                .andExpect(redirectedUrl("/roles/4/permisos"))
+                .andExpect(flash().attribute("error", "Selecciona un permiso"));
+        verifyNoInteractions(roleService);
+    }
+
+    @Test
+    void duplicatePermissionShowsServiceMessage() throws Exception {
+        doThrow(new RuntimeException("El rol ya tiene este permiso")).when(roleService).assignPermission(4L, 3L);
+        mvc.perform(post("/roles/4/permisos/asignar").with(csrf()).param("permissionId", "3"))
+                .andExpect(redirectedUrl("/roles/4/permisos"))
+                .andExpect(flash().attribute("error", "El rol ya tiene este permiso"));
+    }
+
+    @Test
+    void removePermissionDelegatesAndRedirects() throws Exception {
+        mvc.perform(post("/roles/4/permisos/3/quitar").with(csrf()))
+                .andExpect(redirectedUrl("/roles/4/permisos"))
+                .andExpect(flash().attribute("message", "Permiso retirado correctamente"));
+        verify(roleService).removePermission(4L, 3L);
+    }
+
+    @Test
+    void removingLastPermissionShowsErrorEvenIfPostIsSentDirectly() throws Exception {
+        doThrow(new RuntimeException("No se puede dejar el rol sin permisos"))
+                .when(roleService).removePermission(4L, 3L);
+        mvc.perform(post("/roles/4/permisos/3/quitar").with(csrf()))
+                .andExpect(redirectedUrl("/roles/4/permisos"))
+                .andExpect(flash().attribute("error", "No se puede dejar el rol sin permisos"));
+    }
+
+    @Test
+    void rolePermissionActionsRequirePermissionAndCsrf() throws Exception {
+        mvc.perform(get("/roles/4/permisos").with(user("owner").roles("OWNER")))
+                .andExpect(status().isForbidden());
+        mvc.perform(post("/roles/4/permisos/asignar").param("permissionId", "5"))
+                .andExpect(status().isForbidden());
+        mvc.perform(post("/roles/4/permisos/3/quitar"))
+                .andExpect(status().isForbidden());
+        mvc.perform(post("/roles/4/permisos/3/quitar").with(csrf()).with(user("manager")
+                        .authorities(new SimpleGrantedAuthority("MANAGE_USERS"))))
+                .andExpect(status().isForbidden());
+        verifyNoInteractions(roleService, permissionService);
+    }
 }

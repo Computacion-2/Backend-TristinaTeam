@@ -6,5 +6,9 @@
 <h2>Tus roles y permisos</h2><ul><li th:each="authority : ${authorities}" th:text="${authority.authority}"></li></ul>
 <p th:if="${#lists.isEmpty(authorities)}">Tu cuenta no tiene permisos asignados.</p>
 <form method="post" th:action="@{/logout}"><button type="submit">Cerrar sesión</button></form>
-<p th:if="${canManageUsers}"><a th:href="@{/usuarios}">Gestionar usuarios</a></p>
+<nav th:if="${canManageUsers or canManageRoles}" aria-label="Administración"><h2>Administración</h2><ul>
+<li th:if="${canManageUsers}"><a th:href="@{/usuarios}">Gestionar usuarios</a></li>
+<li th:if="${canManageRoles}"><a th:href="@{/roles}">Gestionar roles</a></li>
+<li th:if="${canManageRoles}"><a th:href="@{/permisos}">Gestionar permisos</a></li>
+</ul></nav>
 </main></body></html>

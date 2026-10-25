@@ -86,8 +86,9 @@ Comprobar:
 2. Login, registro y estilos usan el prefijo /cuidapet.
 3. Registrar una cuenta de prueba e iniciar sesión. Los usuarios de los scripts no tienen contraseñas válidas para login; consultar la guía MVC para asignar ADMIN a una cuenta registrada.
 4. Con MANAGE_USERS, crear/editar un usuario, asignar un segundo rol y quitarlo. No se debe poder retirar el último rol.
-5. Con OWNER sin MANAGE_USERS, el acceso a usuarios y sus acciones debe denegarse.
-6. Cerrar sesión y confirmar que las rutas privadas vuelven a pedir login.
+5. Con MANAGE_ROLES, crear un permiso y un rol, asignar y quitar permisos del rol y eliminar el rol.
+6. Con OWNER, el acceso a /usuarios, /roles y /permisos debe denegarse.
+7. Cerrar sesión y confirmar que las rutas privadas vuelven a pedir login.
 
 ## Desplegar en IAsLab cuando se confirmen los datos
 

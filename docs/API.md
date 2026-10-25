@@ -2,7 +2,7 @@
 
 ## 1. Descripción general
 
-Desde la primera etapa MVC, todas las rutas de esta API requieren sesión iniciada mediante `/login`. Usuarios exige `MANAGE_USERS`; roles y permisos exigen `MANAGE_ROLES`. Las operaciones POST también requieren el token CSRF de la misma sesión (encabezado `X-CSRF-TOKEN` para JSON). Los formularios Thymeleaf lo envían automáticamente con `th:action`.
+Todas las rutas de esta API requieren sesión iniciada mediante `/login`. La API de roles y permisos está en `/api/roles` y `/api/permissions`; las rutas `/roles` y `/permisos` corresponden a las vistas MVC. Usuarios exige `MANAGE_USERS`; roles y permisos exigen `MANAGE_ROLES`. Las operaciones POST también requieren el token CSRF de la misma sesión (encabezado `X-CSRF-TOKEN` para JSON). Los formularios Thymeleaf lo envían automáticamente con `th:action`.
 
 El campo `passwordHash` se conserva por compatibilidad en las peticiones de usuarios, pero ahora se envía la contraseña nueva sin codificar y el servicio guarda BCrypt. En una actualización, omitirlo o enviarlo vacío conserva la contraseña actual. Nunca enviar un hash como si fuera la contraseña nueva.
 
@@ -20,15 +20,15 @@ Controlador: `AppPermissionController`
 
 | Método | Ruta | Descripción |
 |---|---|---|
-| GET | `/permissions` | Consultar todos los permisos. |
-| GET | `/permissions/{id}` | Consultar un permiso por su identificador. |
-| POST | `/permissions/create` | Crear un permiso. |
-| POST | `/permissions/update/{id}` | Actualizar un permiso. |
-| POST | `/permissions/delete/{id}` | Eliminar un permiso. |
+| GET | `/api/permissions` | Consultar todos los permisos. |
+| GET | `/api/permissions/{id}` | Consultar un permiso por su identificador. |
+| POST | `/api/permissions/create` | Crear un permiso. |
+| POST | `/api/permissions/update/{id}` | Actualizar un permiso. |
+| POST | `/api/permissions/delete/{id}` | Eliminar un permiso. |
 
 ### Crear un permiso
 
-**Petición:** `POST /permissions/create`
+**Petición:** `POST /api/permissions/create`
 
 ```json
 {
@@ -38,11 +38,11 @@ Controlador: `AppPermissionController`
 }
 ```
 
-El código y el nombre son obligatorios. El identificador y la fecha de creación se gestionan mediante la aplicación y Oracle.
+El código y el nombre son obligatorios. El código se guarda en mayúsculas, debe empezar por una letra, solo admite letras, números y guion bajo, y debe ser único porque Spring Security lo usa como autoridad. El identificador y la fecha de creación se gestionan mediante la aplicación y Oracle.
 
 ### Actualizar un permiso
 
-**Petición:** `POST /permissions/update/1`
+**Petición:** `POST /api/permissions/update/1`
 
 ```json
 {
@@ -59,17 +59,17 @@ Controlador: `AppRoleController`
 
 | Método | Ruta | Descripción |
 |---|---|---|
-| GET | `/roles` | Consultar todos los roles. |
-| GET | `/roles/{id}` | Consultar un rol por identificador. |
-| POST | `/roles/create?permissionIds=1,2` | Crear un rol con permisos. |
-| POST | `/roles/update/{id}` | Actualizar los datos de un rol. |
-| POST | `/roles/delete/{id}` | Eliminar un rol. |
-| POST | `/roles/{roleId}/assign-permission/{permissionId}` | Asignar un permiso a un rol. |
-| POST | `/roles/{roleId}/remove-permission/{permissionId}` | Retirar un permiso de un rol. |
+| GET | `/api/roles` | Consultar todos los roles. |
+| GET | `/api/roles/{id}` | Consultar un rol por identificador. |
+| POST | `/api/roles/create?permissionIds=1,2` | Crear un rol con permisos. |
+| POST | `/api/roles/update/{id}` | Actualizar los datos de un rol. |
+| POST | `/api/roles/delete/{id}` | Eliminar un rol. |
+| POST | `/api/roles/{roleId}/assign-permission/{permissionId}` | Asignar un permiso a un rol. |
+| POST | `/api/roles/{roleId}/remove-permission/{permissionId}` | Retirar un permiso de un rol. |
 
 ### Crear un rol
 
-**Petición:** `POST /roles/create?permissionIds=1,2`
+**Petición:** `POST /api/roles/create?permissionIds=1,2`
 
 ```json
 {
@@ -88,13 +88,13 @@ El parámetro `permissionIds` contiene los identificadores de los permisos que s
 
 ### Asignar un permiso
 
-**Petición:** `POST /roles/1/assign-permission/3`
+**Petición:** `POST /api/roles/1/assign-permission/3`
 
 Asigna el permiso con ID 3 al rol con ID 1.
 
 ### Retirar un permiso
 
-**Petición:** `POST /roles/1/remove-permission/3`
+**Petición:** `POST /api/roles/1/remove-permission/3`
 
 Retira el permiso indicado, siempre que el rol conserve al menos otro permiso.
 
@@ -119,14 +119,14 @@ Controlador: `AppUserController`
 ```json
 {
   "email": "usuario@cuidapet.test",
-  "passwordHash": "HASH_GENERADO_PREVIAMENTE",
+  "passwordHash": "ClaveSegura123",
   "accountStatus": "ACTIVE"
 }
 ```
 
 El parámetro `roleIds` indica los roles que se asignarán al usuario.
 
-El campo `passwordHash` debe contener un hash seguro generado previamente. El endpoint no debe utilizarse para recibir contraseñas en texto plano.
+El campo `passwordHash` recibe la contraseña nueva (8 caracteres como mínimo y 72 bytes UTF-8 como máximo). El servicio la cifra con BCrypt antes de guardarla; no se debe enviar un hash generado previamente.
 
 ### Actualizar un usuario
 
@@ -225,7 +225,7 @@ Este script carga los permisos, roles, usuarios de prueba, especies de mascotas 
 
 Debe ejecutarse después del script de creación del esquema, desde una conexión de Oracle SQL Developer con el usuario de la aplicación.
 
-Los registros de usuarios del script tienen hashes ficticios y solo sirven para verificar la persistencia y las relaciones entre las entidades.
+Los registros de usuarios del script tienen hashes ficticios y solo sirven para verificar la persistencia y las relaciones entre las entidades. Para iniciar sesión como administrador, registrar una cuenta y asignarle ADMIN como se explica en `docs/TALLER_MVC.md`.
 
 
 ## Video de funcionamiento

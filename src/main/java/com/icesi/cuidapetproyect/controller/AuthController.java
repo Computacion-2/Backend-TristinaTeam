@@ -58,8 +58,13 @@ public class AuthController {
     public String home(Authentication authentication, Model model) {
         model.addAttribute("email", authentication.getName());
         model.addAttribute("authorities", authentication.getAuthorities());
-        model.addAttribute("canManageUsers", authentication.getAuthorities().stream()
-                .anyMatch(authority -> "MANAGE_USERS".equals(authority.getAuthority())));
+        model.addAttribute("canManageUsers", hasAuthority(authentication, "MANAGE_USERS"));
+        model.addAttribute("canManageRoles", hasAuthority(authentication, "MANAGE_ROLES"));
         return "home";
+    }
+
+    private boolean hasAuthority(Authentication authentication, String authority) {
+        return authentication.getAuthorities().stream()
+                .anyMatch(granted -> authority.equals(granted.getAuthority()));
     }
 }

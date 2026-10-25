@@ -1,5 +1,6 @@
 package com.icesi.cuidapetproyect.controller;
 
+import com.icesi.cuidapetproyect.model.AppPermission;
 import com.icesi.cuidapetproyect.model.AppRole;
 import com.icesi.cuidapetproyect.service.AppPermissionService;
 import com.icesi.cuidapetproyect.service.AppRoleService;
@@ -10,6 +11,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import java.util.List;
 
 @Controller
 @RequestMapping("/roles")
@@ -101,6 +103,52 @@ public class RoleMvcController {
             redirect.addFlashAttribute("error", MvcMessages.errorMessage(ex));
         }
         return "redirect:/roles";
+    }
+
+    @GetMapping("/{id}/permisos")
+    public String permissions(@PathVariable Long id, Model model, RedirectAttributes redirect) {
+        try {
+            AppRole role = roleService.findById(id);
+            List<AppPermission> assigned = roleService.findPermissions(id);
+            List<Long> assignedIds = assigned.stream().map(AppPermission::getId).toList();
+            model.addAttribute("role", role);
+            model.addAttribute("assignedPermissions", assigned);
+            model.addAttribute("availablePermissions", permissionService.findAll().stream()
+                    .filter(permission -> !assignedIds.contains(permission.getId()))
+                    .toList());
+            return "roles/permisos";
+        } catch (RuntimeException ex) {
+            redirect.addFlashAttribute("error", MvcMessages.errorMessage(ex));
+            return "redirect:/roles";
+        }
+    }
+
+    @PostMapping("/{id}/permisos/asignar")
+    public String assignPermission(@PathVariable Long id, @RequestParam(required = false) Long permissionId,
+                                   RedirectAttributes redirect) {
+        if (permissionId == null) {
+            redirect.addFlashAttribute("error", "Selecciona un permiso");
+            return "redirect:/roles/" + id + "/permisos";
+        }
+        try {
+            roleService.assignPermission(id, permissionId);
+            redirect.addFlashAttribute("message", "Permiso asignado correctamente");
+        } catch (RuntimeException ex) {
+            redirect.addFlashAttribute("error", MvcMessages.errorMessage(ex));
+        }
+        return "redirect:/roles/" + id + "/permisos";
+    }
+
+    @PostMapping("/{id}/permisos/{permissionId}/quitar")
+    public String removePermission(@PathVariable Long id, @PathVariable Long permissionId,
+                                   RedirectAttributes redirect) {
+        try {
+            roleService.removePermission(id, permissionId);
+            redirect.addFlashAttribute("message", "Permiso retirado correctamente");
+        } catch (RuntimeException ex) {
+            redirect.addFlashAttribute("error", MvcMessages.errorMessage(ex));
+        }
+        return "redirect:/roles/" + id + "/permisos";
     }
 
     private AppRole toRole(RoleForm form) {

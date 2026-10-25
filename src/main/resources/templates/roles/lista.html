@@ -13,6 +13,7 @@
 <tbody><tr th:each="role : ${roles}"><td th:text="${role.id}"></td><td th:text="${role.roleName}"></td>
 <td th:text="${role.description}"></td><td th:text="${role.activeFlag == 'Y' ? 'Activo' : 'Inactivo'}"></td>
 <td><a th:href="@{/roles/{id}/editar(id=${role.id})}">Editar</a>
+ · <a th:href="@{/roles/{id}/permisos(id=${role.id})}">Permisos</a>
 <form class="inline-form" method="post" th:unless="${#sets.contains(systemRoles, role.roleName)}" th:action="@{/roles/{id}/eliminar(id=${role.id})}"><button class="danger" type="submit">Eliminar</button></form>
 <span class="tag" th:if="${#sets.contains(systemRoles, role.roleName)}">Sistema</span></td>
 </tr></tbody></table></div>

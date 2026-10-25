@@ -1,8 +1,8 @@
 # CuidaPet Icesi
 
-Proyecto desarrollado para la asignatura Computación en Internet II. Incluye el backend de una plataforma de cuidado de mascotas y la primera etapa del taller MVC: autenticación con Spring Security y vistas con Thymeleaf.
+Proyecto desarrollado para la asignatura Computación en Internet II. Incluye el backend de una plataforma de cuidado de mascotas y el módulo MVC de gestión de usuarios, roles y permisos, protegido con Spring Security y construido con vistas Thymeleaf.
 
-La distribución de los nueve commits entre Juan, Valentina y Gordillo, las instrucciones de autenticación y las tareas pendientes están en [la guía del taller MVC](docs/TALLER_MVC.md). Están implementados login, registro, inicio, seguridad, la gestión MVC de usuarios en `/usuarios` y la asignación y retirada de roles de cada usuario. Quedan pendientes las pantallas de gestión de roles y permisos, y el despliegue.
+La distribución de los nueve commits entre Juan, Valentina y Gordillo, las instrucciones de autenticación y las tareas pendientes están en [la guía del taller MVC](docs/TALLER_MVC.md). Están implementados login, registro, inicio, seguridad, la gestión MVC de usuarios en `/usuarios`, la gestión de roles en `/roles`, la gestión de permisos en `/permisos` y la asociación de permisos a roles. El despliegue en el Tomcat de IAsLab debe confirmarse con la URL real del servidor.
 
 ## 1. Tecnologías utilizadas
 
@@ -84,13 +84,28 @@ Las pruebas cubren los servicios de usuarios, roles, permisos, registro y carga 
 
 ## 7. Funcionalidades implementadas
 
-El backend permite administrar usuarios, roles y permisos mediante sus respectivos controladores REST. Ahora estas rutas requieren sesión y los permisos MANAGE_USERS o MANAGE_ROLES. Los formularios de autenticación están en /login y /register; el registro asigna OWNER y guarda una contraseña BCrypt.
+El módulo se usa desde vistas Thymeleaf. Todas las rutas, excepto `/login` y `/register`, exigen sesión; la gestión de usuarios exige `MANAGE_USERS` y la de roles y permisos exige `MANAGE_ROLES`. El registro asigna OWNER y guarda una contraseña BCrypt.
 
-Las reglas de negocio impiden crear usuarios sin roles, crear roles sin permisos y retirar el último rol o permiso asignado.
+| Funcionalidad del taller | Ruta | Plantilla |
+|---|---|---|
+| Iniciar sesión | `GET /login` | `auth/login.html` |
+| Registrar usuario | `GET/POST /register` | `auth/register.html` |
+| Listar usuarios | `GET /usuarios` | `usuarios/lista.html` |
+| Asociar roles a un usuario | `GET /usuarios/{id}/roles`, `POST /usuarios/{id}/roles/asignar` | `usuarios/roles.html` |
+| Quitar roles a un usuario | `POST /usuarios/{id}/roles/{roleId}/quitar` | `usuarios/roles.html` |
+| Crear roles | `GET /roles/nuevo`, `POST /roles/crear` | `roles/formulario.html` |
+| Eliminar roles | `POST /roles/{id}/eliminar` | `roles/lista.html` |
+| Asociar permisos a un rol | `GET /roles/{id}/permisos`, `POST /roles/{id}/permisos/asignar` | `roles/permisos.html` |
+
+Además, las pantallas permiten crear, editar y eliminar usuarios y permisos, editar roles y quitar permisos de un rol. Todos los formularios usan `th:action`, por lo que envían el token CSRF, y cada POST redirige a una vista GET con un mensaje.
+
+La API REST anterior se conserva en `/users`, `/api/roles` y `/api/permissions`, con las mismas reglas de autorización.
+
+Las reglas de negocio impiden crear usuarios sin roles, crear roles sin permisos y retirar el último rol o permiso asignado. Los códigos de permiso son únicos y no se modifican después de crearse. Los roles ADMIN y OWNER no se pueden renombrar, desactivar ni eliminar, ADMIN conserva MANAGE_USERS y MANAGE_ROLES, y esos dos permisos no se pueden eliminar; así el módulo no se queda sin administración y el registro público siempre tiene el rol OWNER.
 
 La eliminación de usuarios es lógica: el registro permanece en la base de datos con el estado `DELETED`.
 
-También se implementaron validaciones de entrada, manejo de errores HTTP y anotaciones para evitar referencias circulares durante la serialización JSON.
+También se implementaron validaciones de entrada, manejo de errores HTTP para la API REST (las vistas muestran los errores como mensajes) y anotaciones para evitar referencias circulares durante la serialización JSON.
 
 ## 8. Documentación de la API
 
@@ -100,7 +115,7 @@ Las rutas, los parámetros, los ejemplos de peticiones y los códigos HTTP se en
 
 Los usuarios cargados mediante los scripts SQL son registros de prueba y no cuentan con credenciales válidas para autenticación. Crear una cuenta desde /register; la guía MVC explica cómo asignarle ADMIN desde la base para la demostración.
 
-Las funcionalidades REST implementadas corresponden a la administración de usuarios, roles y permisos. Las demás entidades forman parte del modelo de persistencia JPA.
+Las pantallas y la API REST corresponden a la administración de usuarios, roles y permisos. Las demás entidades forman parte del modelo de persistencia JPA.
 
 El proyecto genera `target/cuidapet.war` con `clean verify` y dispone del perfil `iaslab`. La preparación del WAR está implementada; el despliegue real sigue pendiente de confirmar Java y Tomcat en el laboratorio. Ver [la guía de despliegue](docs/DESPLIEGUE.md) antes de cargarlo al servidor.
 

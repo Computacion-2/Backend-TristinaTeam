@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Permisos del rol | CuidaPet</title><link rel="stylesheet" th:href="@{/css/styles.css}"></head>
+<body><main class="card wide">
+<p class="brand">CuidaPet</p><h1>Permisos del rol</h1>
+<p>Rol: <strong th:text="${role.roleName}"></strong> <span class="tag" th:text="${role.activeFlag == 'Y' ? 'Activo' : 'Inactivo'}"></span></p>
+<p class="message" role="status" th:if="${message}" th:text="${message}"></p>
+<p class="message error" role="alert" th:if="${error}" th:text="${error}"></p>
+<h2>Permisos asignados</h2>
+<p>El rol debe conservar al menos un permiso. Los usuarios reciben los cambios al cerrar y volver a iniciar sesión.</p>
+<p th:if="${#lists.isEmpty(assignedPermissions)}">Este rol no tiene permisos asignados.</p>
+<div class="table-scroll" th:unless="${#lists.isEmpty(assignedPermissions)}"><table>
+<thead><tr><th scope="col">Código</th><th scope="col">Nombre</th><th scope="col">Acción</th></tr></thead>
+<tbody><tr th:each="permission : ${assignedPermissions}"><td><code th:text="${permission.permissionCode}"></code></td><td th:text="${permission.permissionName}"></td>
+<td><form method="post" th:action="@{/roles/{id}/permisos/{permissionId}/quitar(id=${role.id},permissionId=${permission.id})}"><button class="danger" type="submit" th:disabled="${#lists.size(assignedPermissions) <= 1}">Quitar permiso</button></form></td>
+</tr></tbody></table></div>
+<h2>Asignar un permiso</h2>
+<p th:if="${#lists.isEmpty(availablePermissions)}">No hay otros permisos disponibles.</p>
+<form method="post" th:unless="${#lists.isEmpty(availablePermissions)}" th:action="@{/roles/{id}/permisos/asignar(id=${role.id})}">
+<label for="permissionId">Permiso</label><select id="permissionId" name="permissionId" required><option value="">Selecciona un permiso</option><option th:each="permission : ${availablePermissions}" th:value="${permission.id}" th:text="${permission.permissionCode + ' · ' + permission.permissionName}"></option></select>
+<button type="submit">Asignar permiso</button></form>
+<p><a th:href="@{/roles}">Volver a roles</a> · <a th:href="@{/permisos}">Gestionar permisos</a></p>
+</main></body></html>
