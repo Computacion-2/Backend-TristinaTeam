@@ -2,7 +2,9 @@
 
 Proyecto desarrollado para la asignatura Computación en Internet II. Incluye el backend de una plataforma de cuidado de mascotas y el módulo MVC de gestión de usuarios, roles y permisos, protegido con Spring Security y construido con vistas Thymeleaf.
 
-La distribución de los nueve commits entre Juan, Valentina y Gordillo, las instrucciones de autenticación y las tareas pendientes están en [la guía del taller MVC](docs/TALLER_MVC.md). Están implementados login, registro, inicio, seguridad, la gestión MVC de usuarios en `/usuarios`, la gestión de roles en `/roles`, la gestión de permisos en `/permisos` y la asociación de permisos a roles. El despliegue en el Tomcat de IAsLab debe confirmarse con la URL real del servidor.
+Integrantes: Juan Pablo Pino, Valentina Martínez y Juan Gordillo.
+
+El módulo permite registrarse, iniciar y cerrar sesión, gestionar usuarios, roles y permisos, asignar roles a usuarios y asociar permisos a roles. La [guía MVC](docs/TALLER_MVC.md) explica su funcionamiento y el recorrido para demostrarlo.
 
 ## 1. Tecnologías utilizadas
 
@@ -18,6 +20,8 @@ La distribución de los nueve commits entre Juan, Valentina y Gordillo, las inst
 ## 2. Estructura del proyecto
 
 - `src/main/java`: entidades JPA, repositorios, servicios y controladores.
+- `src/main/resources/templates`: vistas Thymeleaf.
+- `src/main/resources/static/css/styles.css`: estilos de las pantallas.
 - `src/main/resources/sql`: scripts de creación de la base de datos y datos iniciales.
 - `src/test/java`: pruebas automatizadas.
 - `docs/API.md`: documentación de los endpoints.
@@ -46,7 +50,7 @@ La conexión local utiliza la siguiente dirección:
 
 `jdbc:oracle:thin:@localhost:1521/XEPDB1`
 
-La conexión se configura con `DB_URL`, `DB_USER` y `DB_PASSWORD`; la contraseña es obligatoria y ya no está escrita en las propiedades. Para el perfil `test` se utilizan `TEST_DB_URL`, `TEST_DB_USER` y `TEST_DB_PASSWORD`. Los pasos para definirlas están en [ejecución y despliegue](docs/DESPLIEGUE.md).
+La conexión se configura con `DB_URL`, `DB_USER` y `DB_PASSWORD`; la contraseña es obligatoria y no tiene un valor guardado en las propiedades. Para el perfil `test` se utilizan `TEST_DB_URL`, `TEST_DB_USER` y `TEST_DB_PASSWORD`. Los pasos para definirlas están en [ejecución y despliegue](docs/DESPLIEGUE.md).
 
 ## 5. Ejecución del proyecto
 
@@ -84,7 +88,7 @@ Las pruebas cubren los servicios de usuarios, roles, permisos, registro y carga 
 
 ## 7. Funcionalidades implementadas
 
-El módulo se usa desde vistas Thymeleaf. Todas las rutas, excepto `/login` y `/register`, exigen sesión; la gestión de usuarios exige `MANAGE_USERS` y la de roles y permisos exige `MANAGE_ROLES`. El registro asigna OWNER y guarda una contraseña BCrypt.
+El módulo se usa desde vistas Thymeleaf. `/login`, `/register`, `/css/**` y `/error` son públicos; las demás rutas exigen sesión; la gestión de usuarios exige `MANAGE_USERS` y la de roles y permisos exige `MANAGE_ROLES`. El registro asigna OWNER y guarda una contraseña BCrypt. Solo las cuentas ACTIVE pueden iniciar sesión y los roles inactivos no conceden autoridades.
 
 | Funcionalidad del taller | Ruta | Plantilla |
 |---|---|---|
@@ -117,7 +121,7 @@ Los usuarios cargados mediante los scripts SQL son registros de prueba y no cuen
 
 Las pantallas y la API REST corresponden a la administración de usuarios, roles y permisos. Las demás entidades forman parte del modelo de persistencia JPA.
 
-El proyecto genera `target/cuidapet.war` con `clean verify` y dispone del perfil `iaslab`. La preparación del WAR está implementada; el despliegue real sigue pendiente de confirmar Java y Tomcat en el laboratorio. Ver [la guía de despliegue](docs/DESPLIEGUE.md) antes de cargarlo al servidor.
+El proyecto genera `target/cuidapet.war` con `clean verify` y dispone del perfil `iaslab`. Tomcat conserva el alcance `provided` y la aplicación incluye el inicializador para un contenedor externo. La [guía de ejecución y empaquetado](docs/DESPLIEGUE.md) explica cómo ejecutar el WAR localmente. Esta entrega no requiere un despliegue físico en IAsLab.
 
 ## Video de funcionamiento
 [Ver demostración de CuidaPet](https://drive.google.com/file/d/1CuUJEpwXpszjL59R-BCdbdwqss7HutJX/view?usp=sharing)

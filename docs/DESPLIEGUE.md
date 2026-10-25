@@ -1,13 +1,13 @@
-# Ejecución y despliegue de CuidaPet
+# Ejecución y empaquetado de CuidaPet
 
-Este documento cubre el tercer bloque de Valentina: generar un WAR, configurar Oracle por variables de entorno, ejecutar las pruebas y preparar la entrega al servidor. Preparar el WAR no equivale a haber desplegado la aplicación en IAsLab. La versión de Java, la versión de Tomcat, la dirección de Oracle y el mecanismo de carga del laboratorio siguen pendientes de confirmación.
+Esta guía explica la configuración de Oracle, la ejecución local, las pruebas y la generación de cuidapet.war. El proyecto conserva el empaquetado WAR y el inicializador para un contenedor externo. La entrega del módulo MVC no requiere un despliegue físico en IAsLab.
 
 ## Requisitos
 
 - JDK 21 para compilar y ejecutar este proyecto (pom.xml define java.version=21).
 - Maven mediante mvnw.cmd en Windows o ./mvnw en Linux; alternativamente, Maven instalado.
 - Oracle accesible y esquema preparado con los scripts existentes, sin volver a ejecutar scripts sobre datos que se deban conservar sin revisarlos.
-- Para el WAR externo: Tomcat 11 con Servlet 6.1, compatible con Spring Boot 4.1. No asumir compatibilidad con Tomcat 9 o 10.1. Si IAsLab tiene otra versión, consultar al docente antes de cambiar Spring Boot: puede requerir una adaptación adicional.
+- Para el WAR externo: Tomcat 11 con Servlet 6.1, compatible con Spring Boot 4.1.
 
 Referencias oficiales: [despliegue WAR de Spring Boot](https://docs.spring.io/spring-boot/how-to/deployment/traditional-deployment.html) y [requisitos de contenedores](https://docs.spring.io/spring-boot/system-requirements.html). El proyecto conserva Spring Boot 4.1.1.
 
@@ -32,8 +32,7 @@ Con el perfil iaslab, DB_URL, DB_USER y DB_PASSWORD son obligatorias: no se util
 Desde la carpeta del repositorio:
 
 ```powershell
-# Ajustar la ruta si el JDK 21 está instalado en otra ubicación.
-$env:JAVA_HOME = 'C:\Program Files\Eclipse Adoptium\jdk-21.0.12.101-hotspot'
+# JAVA_HOME debe apuntar al JDK 21 instalado en el equipo.
 .\mvnw.cmd -version
 $env:DB_URL = 'jdbc:oracle:thin:@localhost:1521/XEPDB1'
 $env:DB_USER = 'cuidapet'
@@ -43,11 +42,11 @@ $claveOracle.Dispose()
 .\mvnw.cmd spring-boot:run
 ```
 
-Abrir http://localhost:8080/login. Para detener la aplicación, usar Ctrl+C. Las variables definidas con $env: pertenecen a esta terminal; hay que volver a definirlas al abrir otra. En IntelliJ se pueden configurar en las variables de entorno de la configuración de ejecución, sin compartir el archivo de configuración personal. Las contraseñas que aparecían anteriormente en las propiedades ya no se usan como valores predeterminados; esto no borra su presencia en el historial anterior de Git.
+Abrir http://localhost:8080/login. Para detener la aplicación, usar Ctrl+C. Las variables definidas con $env: pertenecen a esta terminal; hay que volver a definirlas al abrir otra. En IntelliJ se pueden configurar en las variables de entorno de la configuración de ejecución, sin compartir el archivo de configuración personal.
 
 ## Probar y generar el WAR
 
-En la misma terminal con Oracle configurado:
+En la misma terminal con Oracle configurado y el esquema preparado:
 
 ```powershell
 .\mvnw.cmd clean verify
@@ -70,7 +69,7 @@ El esquema de pruebas debe existir y estar preparado. Para verificar solamente l
 
 Esta selección incluye las clases terminadas en Test, pero no CuidaPetProyectApplicationTests, que es la prueba de arranque con Oracle. No usarla como sustituto de clean verify para la entrega final.
 
-## Probar el WAR antes de entregarlo
+## Ejecutar el WAR localmente
 
 Con DB_PASSWORD configurada, ejecutar:
 
@@ -78,7 +77,7 @@ Con DB_PASSWORD configurada, ejecutar:
 & "$env:JAVA_HOME\bin\java.exe" -jar target/cuidapet.war --server.port=8081 --server.servlet.context-path=/cuidapet
 ```
 
-Abrir http://localhost:8081/cuidapet/login. Esta es una prueba del WAR con su servidor integrado; no demuestra por sí sola el despliegue en un Tomcat externo. El paquete separa las dependencias del servidor integrado en WEB-INF/lib-provided para permitir ambas formas de ejecución.
+Abrir http://localhost:8081/cuidapet/login. El WAR también se puede ejecutar con su servidor integrado. El paquete separa las dependencias del servidor integrado en WEB-INF/lib-provided para permitir ambas formas de ejecución.
 
 Comprobar:
 
@@ -90,14 +89,11 @@ Comprobar:
 6. Con OWNER, el acceso a /usuarios, /roles y /permisos debe denegarse.
 7. Cerrar sesión y confirmar que las rutas privadas vuelven a pedir login.
 
-## Desplegar en IAsLab cuando se confirmen los datos
+## Configuración para un contenedor externo
 
-1. Pedir al docente o administrador la versión de Tomcat y Java, URL JDBC, usuario de Oracle, permisos de despliegue y URL final asignada al equipo. No inventar direcciones ni copiar los valores de localhost al servidor: allí localhost se refiere al propio servidor.
-2. Preparar el esquema correspondiente según las indicaciones del laboratorio. No ejecutar automáticamente los scripts de creación sobre un esquema existente.
-3. El administrador configura SPRING_PROFILES_ACTIVE=iaslab, DB_URL, DB_USER y DB_PASSWORD para el proceso de Tomcat y lo reinicia según las reglas del laboratorio. Si Tomcat es compartido, acordar con el administrador cómo aislar la configuración; no cambiar variables globales que afecten aplicaciones de otros grupos.
-4. Generar target/cuidapet.war mediante clean verify. Usar el Tomcat Manager autorizado o el mecanismo de carga que indique IAsLab. Si el procedimiento permite copiar a webapps, el destino corresponde al CATALINA_BASE de ese servidor, no a una ruta supuesta.
-5. Si el WAR se llama cuidapet.war y no hay una configuración de contexto diferente, la ruta será /cuidapet. Host, puerto y protocolo los proporciona el laboratorio. En Tomcat externo, el puerto lo define Tomcat; PORT solo aplica al servidor integrado.
-6. Revisar los logs y ejecutar la comprobación funcional anterior con la URL real. Registrar la URL, versiones, fecha y resultado en la documentación del equipo. Repetir el empaquetado y despliegue tras integrar las partes de Gordillo.
+El `pom.xml` conserva `packaging=war`, `finalName=cuidapet` y Tomcat con alcance `provided`. `CuidaPetProyectApplication` extiende `SpringBootServletInitializer` e implementa `configure`.
+
+El perfil `iaslab` permite obtener DB_URL, DB_USER y DB_PASSWORD del proceso que ejecuta el contenedor. En un Tomcat externo compatible, el nombre `cuidapet.war` determina por defecto el contexto `/cuidapet`; el puerto lo define Tomcat. PORT solo aplica al servidor integrado. Esta configuración forma parte del proyecto y el despliegue externo es opcional para esta entrega.
 
 ## Problemas frecuentes
 
@@ -108,7 +104,3 @@ Comprobar:
 - 404 en el servidor: comprobar nombre del WAR y contexto; /login puede ser /cuidapet/login.
 - 403: revisar permisos del usuario y enviar los formularios desde la página para incluir CSRF. No desactivar la protección.
 - Error de versión de clases o Servlet: comprobar Java 21 y compatibilidad Servlet 6.1 antes de cambiar código.
-
-## Verificación del tercer bloque
-
-El 24 de octubre de 2026 se ejecutó mvn -o verify con Java 21 y Oracle local: 156 pruebas, 0 fallos, 0 errores y 0 omitidas; BUILD SUCCESS. Se inspeccionó el WAR para confirmar WarLauncher, clases y plantillas, perfil iaslab y Tomcat core/websocket en WEB-INF/lib-provided. Se inició el WAR localmente con el perfil iaslab y el contexto /cuidapet: login, registro y CSS respondieron 200, y usuarios sin sesión respondió 302 hacia /cuidapet/login. El servidor de prueba se detuvo al terminar. No se desplegó en un Tomcat externo ni en IAsLab; esa comprobación sigue pendiente.

@@ -4,7 +4,7 @@
 
 Todas las rutas de esta API requieren sesión iniciada mediante `/login`. La API de roles y permisos está en `/api/roles` y `/api/permissions`; las rutas `/roles` y `/permisos` corresponden a las vistas MVC. Usuarios exige `MANAGE_USERS`; roles y permisos exigen `MANAGE_ROLES`. Las operaciones POST también requieren el token CSRF de la misma sesión (encabezado `X-CSRF-TOKEN` para JSON). Los formularios Thymeleaf lo envían automáticamente con `th:action`.
 
-El campo `passwordHash` se conserva por compatibilidad en las peticiones de usuarios, pero ahora se envía la contraseña nueva sin codificar y el servicio guarda BCrypt. En una actualización, omitirlo o enviarlo vacío conserva la contraseña actual. Nunca enviar un hash como si fuera la contraseña nueva.
+El campo `passwordHash` se conserva por compatibilidad en las peticiones de usuarios, pero se envía la contraseña nueva sin codificar y el servicio guarda BCrypt. En una actualización, omitirlo o enviarlo vacío conserva la contraseña actual. Nunca enviar un hash como si fuera la contraseña nueva.
 
 El backend de CuidaPet está desarrollado con Spring Boot, Spring Data JPA y Oracle. Permite administrar usuarios, roles y permisos, respetando las relaciones entre estas entidades y las reglas de negocio implementadas en los servicios.
 
@@ -85,6 +85,9 @@ El parámetro `permissionIds` contiene los identificadores de los permisos que s
 - Un rol debe tener al menos un permiso.
 - No se permite retirar el último permiso de un rol.
 - Los permisos que se asignan deben existir.
+- ADMIN y OWNER no se pueden renombrar, desactivar ni eliminar.
+- No se puede eliminar un rol asignado a usuarios.
+- MANAGE_USERS y MANAGE_ROLES no se pueden eliminar; ningún permiso se elimina si deja un rol sin permisos.
 
 ### Asignar un permiso
 
@@ -96,7 +99,7 @@ Asigna el permiso con ID 3 al rol con ID 1.
 
 **Petición:** `POST /api/roles/1/remove-permission/3`
 
-Retira el permiso indicado, siempre que el rol conserve al menos otro permiso.
+Retira el permiso indicado, siempre que el rol conserve al menos otro permiso. ADMIN debe conservar MANAGE_USERS y MANAGE_ROLES.
 
 ## 4. Endpoints de usuarios
 
@@ -126,7 +129,7 @@ Controlador: `AppUserController`
 
 El parámetro `roleIds` indica los roles que se asignarán al usuario.
 
-El campo `passwordHash` recibe la contraseña nueva (8 caracteres como mínimo y 72 bytes UTF-8 como máximo). El servicio la cifra con BCrypt antes de guardarla; no se debe enviar un hash generado previamente.
+El campo `passwordHash` recibe la contraseña nueva, no vacía y con un máximo de 72 bytes UTF-8. El registro público y los formularios MVC exigen además un mínimo de 8 caracteres. El servicio la cifra con BCrypt antes de guardarla; no se debe enviar un hash generado previamente.
 
 ### Actualizar un usuario
 
@@ -139,7 +142,7 @@ El campo `passwordHash` recibe la contraseña nueva (8 caracteres como mínimo y
 }
 ```
 
-Los campos efectivamente modificados dependen de la implementación de `AppUserService.update()`.
+La actualización guarda el correo y el estado. Si se envía una contraseña nueva en `passwordHash`, se cifra con BCrypt; omitirla o enviarla vacía conserva la anterior. Esta operación no cambia los roles asignados.
 
 ### Eliminar un usuario
 
@@ -157,6 +160,8 @@ La eliminación es lógica. El registro permanece en Oracle, pero su estado camb
 | Código | Significado |
 |---|---|
 | 200 | La operación se ejecutó correctamente. |
+| 302 | Sin sesión, se redirige a `/login`. |
+| 403 | La sesión carece del permiso requerido o el POST no incluye un CSRF válido. |
 | 400 | La petición contiene datos inválidos, un JSON incorrecto o carece de un parámetro obligatorio. |
 | 404 | No se encontró el registro solicitado. |
 | 409 | La operación incumple una regla de negocio o entra en conflicto con datos existentes. |
@@ -189,6 +194,8 @@ Las pruebas principales están organizadas en las siguientes clases:
 - `AppPermissionServiceTest`
 - `AppRoleServiceTest`
 - `AppUserServiceTest`
+- `AuthServiceTest`
+- `AppUserDetailsServiceTest`
 - `AppPermissionControllerTest`
 - `AppRoleControllerTest`
 - `AppUserControllerTest`
@@ -209,7 +216,7 @@ El reporte se genera en:
 target/site/jacoco/index.html
 ```
 
-El objetivo de cobertura del proyecto es mantener el 100 % de instrucciones y ramas en los tres servicios.
+El reporte muestra la cobertura de los servicios y controladores. La suite completa incluye las pruebas MVC, de seguridad y de arranque; esta última requiere Oracle configurado.
 
 ## 8. Configuración de Oracle y datos iniciales
 

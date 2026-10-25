@@ -1,62 +1,90 @@
-# Continuación del taller MVC
+# Módulo MVC de CuidaPet
 
-## Reparto y orden de trabajo
+CuidaPet incluye un módulo de administración de usuarios, roles y permisos con Spring Boot, Thymeleaf y Spring Security. Sus integrantes son Juan Pablo Pino, Valentina Martínez y Juan Gordillo.
 
-El taller anterior ya implementa los CRUD y pruebas de usuarios, roles y permisos. No hay que volver a escribirlos. Cada integrante debe desarrollar, probar y explicar su parte. Tres commits sirven para organizar el trabajo; el equilibrio se evalúa por funcionalidades y esfuerzo, no por número de archivos.
+## Arquitectura
 
-| Orden | Integrante | Commit | Alcance |
-|---|---|---|---|
-| 1 | Juan | 1. Autenticación y contraseñas seguras | Dependencias, BCrypt, registro con OWNER, UserDetailsService y pruebas de servicios. |
-| 1 | Juan | 2. Reglas de acceso | SecurityFilterChain: login/registro públicos, módulos protegidos por permisos, CSRF y pruebas de autorización. |
-| 1 | Juan | 3. Vistas de autenticación | Controlador MVC, login, registro, inicio, CSS, pruebas de formularios y esta guía. |
-| 2 | Valentina | 1. Gestión MVC de usuarios | Crear UserMvcController en /usuarios y vistas usuarios/lista.html y usuarios/formulario.html. Listar, crear, editar y eliminar lógicamente; reutilizar AppUserService. Añadir pruebas. |
-| 2 | Valentina | 2. Roles de un usuario | Vista usuarios/roles.html para consultar, asignar y quitar roles; usar assignRole/removeRole. Probar duplicados, usuario inexistente y último rol. Añadir enlace de usuarios al inicio solo si tiene MANAGE_USERS. |
-| 2 | Valentina | 3. Ejecución y despliegue | Preparar WAR para la versión real de Tomcat de IAsLab, configuración de conexión por variables y guía de ejecución/despliegue. Revisar pruebas de AppUserService y documentar demostración de usuarios. El despliegue definitivo se repite al integrar a Gordillo. |
-| 3 | Gordillo | 1. Gestión MVC de permisos | PermissionMvcController en /permisos, listado y formulario con crear/editar/eliminar. Reutilizar AppPermissionService y probar las reglas de permisos en uso. |
-| 3 | Gordillo | 2. Gestión MVC de roles | RoleMvcController en /roles: listar, crear con permisos, editar y eliminar. Mover la API REST anterior de /roles a /api/roles y actualizar sus pruebas y documentación. Añadir /api/roles y /api/roles/** a la regla MANAGE_ROLES de SecurityConfig antes de moverla. |
-| 3 | Gordillo | 3. Permisos de un rol e integración | Vista roles/permisos.html para asignar y quitar permisos; pruebas, enlaces de roles/permisos según MANAGE_ROLES, documentación de pantallas y verificación final con los tres integrantes. |
+Las peticiones pasan por Spring Security y llegan a controladores con `@Controller`. Los controladores reciben los formularios y llaman a los servicios; estos aplican las reglas de negocio y acceden a Oracle mediante repositorios JPA.
 
-La carga de Juan es mayor en seguridad; Valentina combina usuarios con preparación del despliegue; Gordillo concentra roles y permisos. Cada integrante añade sus pruebas en cada commit, en lugar de dejarle todas las pruebas a una persona.
-
-## Contrato para continuar sin conflictos
-
-- Mantener las entidades, repositorios y servicios del taller anterior. Los controladores MVC nuevos llevan @Controller; la API anterior usa @RestController.
-- GET carga datos en Model y devuelve el nombre de la plantilla. POST llama al servicio y devuelve redirect:, incluso si ocurre un error de validación; usar RedirectAttributes para el mensaje.
-- Todos los formularios POST usan th:action, incluyendo eliminar, asignar, quitar y cerrar sesión. No desactivar CSRF.
-- Todas las vistas usan /css/styles.css. Pueden ampliar este archivo para tablas y formularios.
-- /users y /usuarios requieren MANAGE_USERS. /roles, /permisos, /api/roles y /api/permissions requieren MANAGE_ROLES, incluyendo subrutas. Si agregan otra ruta administrativa, añadir su regla explícita y una prueba de rechazo sin permiso.
-- Para ocultar un enlace, enviar al Model un booleano obtenido de Authentication.getAuthorities(); usar th:if. Esto complementa las reglas del servidor, nunca las reemplaza.
-- La API de usuarios mantiene passwordHash como nombre del campo por compatibilidad, pero recibe la contraseña nueva sin codificar; AppUserService aplica BCrypt. En update, null o vacío conserva la contraseña existente. No enviar de vuelta el hash ni precodificarlo.
-- El registro público no recibe IDs de roles ni estado. Siempre crea una cuenta ACTIVE con OWNER. No permitir autoasignarse ADMIN.
-- Los roles inactivos no aportan autoridades. Los usuarios que no estén ACTIVE no pueden iniciar sesión.
-- Los cambios de roles/permisos se reflejan al cerrar y volver a iniciar sesión: las autoridades se cargan durante el login.
-- Las reglas previas se mantienen: al menos un rol por usuario y al menos un permiso por rol. Mostrar errores de negocio en la vista; no eliminar estas validaciones para facilitar un formulario.
-- El inicio muestra la cuenta, sus autoridades y los enlaces de administración que correspondan a MANAGE_USERS y MANAGE_ROLES.
-
-## Cómo ejecutar la parte de Juan
-
-1. Usar Java 21. Si Maven utiliza otra versión, ajustar JAVA_HOME en esa terminal. Comprobar con mvn -version.
-2. Tener Oracle disponible y ejecutar los scripts existentes 01_creacion.sql y 02_datos_iniciales.sql en el orden indicado en README. Revisarlos antes de ejecutarlos sobre una base con datos que se deban conservar.
-3. Verificar la conexión en application.properties. Deben existir OWNER activo y sus permisos iniciales. Los usuarios del script tienen contraseñas de ejemplo que no sirven para iniciar sesión.
-4. Ejecutar .\mvnw.cmd spring-boot:run (o mvn spring-boot:run si Maven ya está instalado).
-5. Abrir http://localhost:8080/register. Registrar un correo nuevo y contraseña de al menos 8 caracteres (hasta 72 bytes UTF-8 por el límite de BCrypt).
-6. Iniciar sesión en /login. Se mostrará la cuenta y ROLE_OWNER con sus permisos. Cerrar sesión desde el botón.
-
-### Si Maven muestra release version 21 not supported
-
-Este error indica que Maven está usando un JDK anterior a Java 21. En PowerShell, desde la carpeta del proyecto, seleccionar el JDK 21 instalado y comprobar la versión que realmente usa Maven:
-
-```powershell
-# Ruta comprobada en el equipo de Juan; en otro equipo ajustar a su instalación.
-$env:JAVA_HOME = 'C:\Program Files\Eclipse Adoptium\jdk-21.0.12.101-hotspot'
-.\mvnw.cmd -version
+```text
+Navegador → Spring Security → Controller → Service → Repository → Oracle
+Controller → Model → Thymeleaf → HTML
 ```
 
-La salida debe indicar Java 21. Luego ejecutar ` .\mvnw.cmd spring-boot:run ` en la misma terminal. El cambio de JAVA_HOME solo aplica a esa sesión de PowerShell; al abrir otra terminal hay que repetirlo si la configuración general sigue apuntando a otro JDK.
+Los GET cargan datos en `Model` y devuelven una plantilla. Los POST llaman al servicio y redirigen a un GET, con mensajes de éxito o error mediante `RedirectAttributes`. Las vistas usan `/css/styles.css` y `th:action` para enviar los formularios con CSRF.
 
-## Preparar una cuenta de administración para la demostración
+La API REST se conserva en `/users`, `/api/roles` y `/api/permissions`, con las mismas restricciones que las pantallas. Sus rutas están en [API.md](API.md).
 
-Registrar primero una cuenta propia mediante /register. Luego, el responsable de la base de datos puede asignarle el rol ADMIN con esta consulta, reemplazando el correo por el que registró. No existe una contraseña de administrador incorporada en el código y esta consulta no modifica contraseñas.
+## Autenticación y autorización
+
+`AuthController` muestra login y registro. `AuthService` registra cuentas ACTIVE con OWNER; el visitante no puede escoger ADMIN ni cambiar su estado. `AppUserService` cifra las contraseñas con el `PasswordEncoder` BCrypt de `PasswordConfig`. El registro y los formularios MVC de usuarios solicitan al menos 8 caracteres, con un máximo de 72 bytes UTF-8 para BCrypt.
+
+`AppUserDetailsService` implementa `UserDetailsService`. `loadUserByUsername` busca por correo, recupera los roles activos y sus permisos y los convierte en `GrantedAuthority`. Los roles reciben el prefijo `ROLE_` y los permisos conservan su código. Las cuentas distintas de ACTIVE no pueden iniciar sesión. Los cambios de roles y permisos se reflejan al cerrar y volver a iniciar sesión.
+
+`SecurityConfig` define la `SecurityFilterChain`:
+
+| Rutas | Acceso |
+|---|---|
+| `/login`, `/register`, `/css/**`, `/error` | Público |
+| `/usuarios`, `/usuarios/**`, `/users`, `/users/**` | MANAGE_USERS |
+| `/roles`, `/roles/**`, `/permisos`, `/permisos/**` | MANAGE_ROLES |
+| `/api/roles`, `/api/roles/**`, `/api/permissions`, `/api/permissions/**` | MANAGE_ROLES |
+| Resto | Sesión iniciada |
+
+CSRF permanece habilitado, incluso en login y registro. El cierre de sesión usa `POST /logout`. El inicio muestra la cuenta, sus autoridades y los enlaces de administración según sus permisos. Ocultar enlaces complementa las restricciones del servidor.
+
+## Gestión de usuarios
+
+`UserMvcController` utiliza `AppUserService` para listar, crear, editar y eliminar usuarios. Los correos son únicos y la eliminación es lógica mediante el estado DELETED. Al editar, una contraseña vacía conserva la actual; una nueva se cifra antes de guardar. Las vistas no muestran `passwordHash` y la API lo excluye de sus respuestas.
+
+| Operación | Ruta |
+|---|---|
+| Listar | `GET /usuarios` |
+| Formulario de creación | `GET /usuarios/nuevo` |
+| Crear | `POST /usuarios/crear` |
+| Consultar y guardar edición | `GET/POST /usuarios/{id}/editar` |
+| Eliminar lógicamente | `POST /usuarios/{id}/eliminar` |
+| Consultar roles | `GET /usuarios/{id}/roles` |
+| Asignar rol | `POST /usuarios/{id}/roles/asignar`, parámetro `roleId` |
+| Quitar rol | `POST /usuarios/{id}/roles/{roleId}/quitar` |
+
+Cada usuario debe tener al menos un rol. Al crear se seleccionan los roles iniciales; en la pantalla de roles se consultan y cambian las asignaciones. No se permiten asignaciones duplicadas, roles sin permisos ni quitar el último rol, aunque se envíe el POST directamente.
+
+## Gestión de roles y permisos
+
+`RoleMvcController` y `PermissionMvcController` delegan en `AppRoleService` y `AppPermissionService`. Los tres servicios de gestión ofrecen `findAll`, `findById`, `create`, `update` y `delete`.
+
+| Operación | Ruta |
+|---|---|
+| Listar roles | `GET /roles` |
+| Formulario de rol | `GET /roles/nuevo` |
+| Crear rol con permisos | `POST /roles/crear` |
+| Consultar y guardar edición de rol | `GET/POST /roles/{id}/editar` |
+| Eliminar rol | `POST /roles/{id}/eliminar` |
+| Consultar permisos del rol | `GET /roles/{id}/permisos` |
+| Asignar permiso | `POST /roles/{id}/permisos/asignar`, parámetro `permissionId` |
+| Quitar permiso | `POST /roles/{id}/permisos/{permissionId}/quitar` |
+| Listar permisos | `GET /permisos` |
+| Formulario de permiso | `GET /permisos/nuevo` |
+| Crear permiso | `POST /permisos/crear` |
+| Consultar y guardar edición de permiso | `GET/POST /permisos/{id}/editar` |
+| Eliminar permiso | `POST /permisos/{id}/eliminar` |
+
+Un rol se crea con al menos un permiso. Los nombres de roles y códigos de permisos se normalizan a mayúsculas, empiezan por una letra y admiten letras, números y guion bajo. No se repiten nombres de roles, códigos ni nombres de permisos. El código de un permiso no cambia al editarlo.
+
+No se puede quitar el último permiso ni eliminar un permiso si eso deja un rol sin permisos. Eliminar un rol exige que no esté asignado a usuarios. ADMIN y OWNER no se pueden renombrar, desactivar ni eliminar. ADMIN conserva MANAGE_USERS y MANAGE_ROLES; estos permisos tampoco se pueden eliminar.
+
+## Ejecución y cuenta de administración
+
+Usar Java 21, preparar Oracle con `01_creacion.sql` y después `02_datos_iniciales.sql` y definir las variables de conexión descritas en [DESPLIEGUE.md](DESPLIEGUE.md). Desde la raíz:
+
+```powershell
+.\mvnw.cmd spring-boot:run
+```
+
+Abrir `http://localhost:8080/register`. Los usuarios del script tienen hashes ficticios para los datos de ejemplo; las cuentas para iniciar sesión se crean desde el registro.
+
+Para preparar la primera cuenta de administración, registrar una cuenta propia. Desde una conexión autorizada al esquema, ejecutar esta consulta sustituyendo el correo por el registrado:
 
 ```sql
 INSERT INTO USER_ROLE (USER_ID, ROLE_ID, ASSIGNED_AT)
@@ -72,107 +100,25 @@ WHERE u.EMAIL = 'correo-registrado@icesi.edu.co'
 COMMIT;
 ```
 
-Los datos iniciales de ADMIN incluyen MANAGE_USERS y MANAGE_ROLES. Cerrar sesión e iniciar de nuevo después de asignar el rol. En el inicio aparecerán los enlaces para gestionar usuarios, roles y permisos.
+Cerrar sesión y volver a entrar. ADMIN recibe MANAGE_USERS y MANAGE_ROLES de los datos iniciales. Las demás asignaciones se administran desde las pantallas.
 
-## Pruebas y comprobación manual
+## Pruebas y demostración
+
+La suite incluye `AppUserServiceTest`, `AppRoleServiceTest`, `AppPermissionServiceTest`, `AuthServiceTest` y `AppUserDetailsServiceTest`. Comprueba CRUD, asignaciones, duplicados, contraseñas y autoridades. Las pruebas MVC y de seguridad verifican plantillas, mensajes, redirecciones, ausencia de hashes en las respuestas, permisos y rechazo de POST sin CSRF. `CuidaPetProyectApplicationTests` valida el arranque con Oracle.
+
+Con la conexión Oracle configurada:
 
 ```powershell
-# Servicios y autenticación MVC sin necesitar Oracle:
-.\mvnw.cmd test "-Dtest=*ServiceTest,AppUserDetailsServiceTest,SecurityConfigTest,AuthControllerSecurityTest"
-
-# Suite completa y cobertura; contextLoads necesita Oracle:
 .\mvnw.cmd clean verify
 ```
 
-Maven carga Mockito como agente al iniciar Java para evitar la conexión dinámica de agentes en entornos restringidos. La configuración está en maven-surefire-plugin dentro de pom.xml.
+Maven genera `target/cuidapet.war` y `target/site/jacoco/index.html`. El empaquetado WAR se conserva como configuración del proyecto; esta entrega no exige desplegarlo físicamente en IAsLab.
 
-Comprobar manualmente:
+Recorrido de demostración:
 
-1. Sin sesión, / debe redirigir a /login; login, registro y CSS deben abrir.
-2. Registrar una cuenta válida; revisar que PASSWORD_HASH contiene un hash BCrypt, nunca la contraseña original.
-3. Repetir el correo, usar correo inválido o contraseña corta: mensaje de error y redirección a registro, sin conservar la contraseña en el formulario.
-4. Probar contraseña equivocada y cuenta DELETED: no deben iniciar sesión.
-5. Con OWNER, abrir /usuarios, /roles, /permisos o la API REST: debe negar acceso.
-6. Con permisos de administración, las pantallas y la API REST aplican las mismas reglas.
-7. Cerrar sesión y volver a una ruta privada: debe solicitar login otra vez.
-8. Al integrar todo, probar crear y eliminar roles, asignar y quitar roles de usuarios, asociar permisos y ejecutar todas las pruebas.
-
-## Primera parte de gestión MVC de usuarios
-
-Esta parte corresponde al primer bloque asignado a Valentina. Incluye `UserMvcController`, `UserForm`, las plantillas `usuarios/lista.html` y `usuarios/formulario.html`, estilos de tabla y pruebas MVC. Reutiliza los servicios existentes; no implementa todavía la pantalla para asignar y quitar roles a usuarios existentes.
-
-Para probarla, iniciar sesión con una cuenta que tenga MANAGE_USERS y abrir el enlace Gestionar usuarios del inicio:
-
-1. `/usuarios`: listar cuentas y estados, sin mostrar contraseñas.
-2. `/usuarios/nuevo`: crear una cuenta con correo, contraseña, estado y al menos un rol inicial con permisos.
-3. `/usuarios/{id}/editar`: actualizar correo, estado y opcionalmente contraseña. Vacío conserva la contraseña anterior. Este formulario no modifica roles.
-4. El botón Eliminar envía un POST y usa la eliminación lógica existente: el usuario sigue listado con estado DELETED.
-5. Probar correo duplicado, datos inválidos, cuenta inexistente y acceso con OWNER: deben mostrarse errores o denegarse el acceso según corresponda.
-
-Las pruebas nuevas están en `UserMvcControllerTest`; ejecutar `mvn test -Dtest=UserMvcControllerTest` para esa clase o `mvn verify` para la suite completa. Todos los formularios usan `th:action` y las operaciones POST redirigen. Los roles iniciales se eligen al crear para cumplir la regla previa de al menos un rol; la gestión posterior de esos roles queda para el segundo bloque.
-
-## Segunda parte de gestión MVC de usuarios
-
-El segundo bloque de Valentina añade el enlace Roles de cada fila del listado y la vista `usuarios/roles.html`. Con MANAGE_USERS se puede abrir `/usuarios/{id}/roles`, consultar las asignaciones, elegir un rol no asignado y quitar uno existente. Los controladores delegan en `findRoles`, `assignRole` y `removeRole` de AppUserService.
-
-Los POST `/usuarios/{id}/roles/asignar` (parámetro roleId) y `/usuarios/{id}/roles/{roleId}/quitar` requieren CSRF y redirigen a la pantalla de roles con un mensaje. Si la cuenta no existe, la consulta regresa al listado. Se conserva la regla del servicio de no quitar el último rol, aunque se envíe el POST directamente; además, el botón queda deshabilitado cuando solo hay uno. Los roles duplicados o sin permisos producen el mensaje de la regla existente.
-
-Comprobación manual:
-
-1. Entrar con una cuenta que tenga MANAGE_USERS y abrir Usuarios → Roles de una cuenta de prueba.
-2. Asignar un rol con permisos que todavía no tenga. Comprobar que aparece en la tabla y desaparece del selector.
-3. Con dos roles asignados, quitar uno. Comprobar que vuelve a estar disponible en el selector.
-4. Comprobar que no se puede quitar el último. Los cambios se reflejan en el acceso de la cuenta afectada cuando cierre y vuelva a iniciar sesión.
-5. Iniciar sesión como OWNER sin MANAGE_USERS e intentar abrir la misma ruta: debe denegar acceso.
-
-Las pruebas de pantalla y seguridad están en UserMvcControllerTest; las pruebas de consulta y las reglas de asignar/quitar están en AppUserServiceTest. Ejecutar `mvn verify` para verificar toda la aplicación. Este bloque no modifica las pantallas de creación de roles o permisos ni prepara el despliegue.
-
-## Tercer bloque de Valentina
-
-El proyecto ahora genera `target/cuidapet.war`, incorpora el inicializador para Tomcat y obtiene las credenciales de Oracle mediante variables de entorno. Antes de ejecutar o probar, definir DB_PASSWORD (o TEST_DB_PASSWORD con el perfil test), siguiendo [la guía de ejecución y despliegue](DESPLIEGUE.md). Los comandos anteriores de esta guía requieren esa configuración.
-
-El perfil iaslab exige DB_URL, DB_USER y DB_PASSWORD. El WAR está preparado para verificar y desplegar con Java 21 y un contenedor compatible con Servlet 6.1, como Tomcat 11. La versión del servidor de IAsLab todavía no está confirmada: no se considera desplegado hasta comprobarla, cargar el WAR y probar la URL real. Las pantallas pendientes de Gordillo deben integrarse y volver a probarse antes de la entrega final.
-
-## Entrega final pendiente de los tres integrantes
-
-La parte de Juan no representa el taller completo. Faltan las pantallas de gestión y el despliegue efectivo. La entrega requiere el código en el repositorio de Classroom, commits reales de los tres, documentación detallada, pruebas de todos los servicios (incluyendo AuthService y AppUserDetailsService) y la aplicación funcionando en Tomcat de IAsLab. Confirmar versión de Tomcat/Jakarta y recursos del servidor antes de elegir la configuración WAR.
-
-Trabajar en orden: Juan termina y publica sus commits; Valentina hace git pull y desarrolla sus tres commits; Gordillo hace git pull y desarrolla los suyos. No crear commits con el nombre de otro integrante. Cada persona verifica su configuración de Git y entiende el código que entrega.
-
-
-## Verificación de la primera etapa
-
-El 22 de octubre de 2026 se ejecutó `mvn -o verify` con Java 21 y la base Oracle local configurada: 129 pruebas, 0 fallos, 0 errores y 0 omitidas; BUILD SUCCESS. Incluye el arranque del contexto con Oracle, los servicios del taller anterior, la autenticación, los formularios Thymeleaf, CSRF y las reglas de autorización. También se generaron el JAR y el reporte JaCoCo. Esta comprobación no equivale al despliegue en IAsLab ni sustituye las pruebas de las futuras pantallas de gestión.
-
-## Gestión MVC de permisos y roles
-
-Esta parte corresponde a los tres bloques de Gordillo. Todas las rutas exigen MANAGE_ROLES; los formularios usan `th:action` y cada POST redirige con un mensaje.
-
-Permisos (`PermissionMvcController`, plantillas `permisos/lista.html` y `permisos/formulario.html`):
-
-1. `/permisos`: listar código, nombre y descripción.
-2. `/permisos/nuevo`: crear un permiso. El código se guarda en mayúsculas, debe ser único y no se puede editar después, porque es la autoridad que evalúa Spring Security.
-3. `/permisos/{id}/editar`: cambiar nombre y descripción.
-4. Eliminar: se rechaza si algún rol quedaría sin permisos. MANAGE_USERS y MANAGE_ROLES no se pueden eliminar.
-
-Roles (`RoleMvcController`, plantillas `roles/lista.html`, `roles/formulario.html` y `roles/permisos.html`):
-
-1. `/roles`: listar roles con su estado.
-2. `/roles/nuevo`: crear un rol con nombre, descripción, estado y al menos un permiso inicial.
-3. `/roles/{id}/editar`: cambiar nombre, descripción y estado.
-4. Eliminar: solo roles que no estén asignados a usuarios.
-5. `/roles/{id}/permisos`: consultar los permisos del rol, asignar uno que no tenga y quitar uno existente. El rol debe conservar al menos un permiso.
-
-ADMIN y OWNER son roles del sistema: no se pueden renombrar, desactivar ni eliminar. ADMIN conserva MANAGE_USERS y MANAGE_ROLES. Estas reglas evitan que el módulo quede sin administrador y que el registro público falle por falta del rol OWNER. La API REST anterior pasó a `/api/roles` y `/api/permissions`.
-
-Comprobación manual con una cuenta ADMIN:
-
-1. En el inicio aparecen Gestionar usuarios, Gestionar roles y Gestionar permisos.
-2. Crear el permiso `view_reports`: se guarda como VIEW_REPORTS. Repetir el código debe mostrar un error.
-3. Crear el rol PET_WALKER con VIEW_REPORTS. Desde Permisos del rol, asignarle CREATE_REQUEST y quitarle VIEW_REPORTS; el último permiso no se puede quitar.
-4. Asignar PET_WALKER a un usuario desde Usuarios → Roles, cerrar sesión con ese usuario y volver a entrar: sus autoridades incluyen ROLE_PET_WALKER y CREATE_REQUEST.
-5. Intentar eliminar PET_WALKER mientras está asignado: debe rechazarse. Quitárselo al usuario y eliminarlo.
-6. Intentar desactivar ADMIN o quitarle MANAGE_ROLES: debe rechazarse.
-7. Con una cuenta OWNER, abrir /roles o /permisos: debe mostrarse acceso denegado.
-
-Las pruebas están en `PermissionMvcControllerTest`, `RoleMvcControllerTest`, `AppPermissionServiceTest` y `AppRoleServiceTest`. Ejecutar `mvn clean verify` con Oracle configurado para la suite completa.
+1. Sin sesión, abrir una ruta privada y comprobar la redirección al login. Registrar una cuenta y verificar en Oracle que PASSWORD_HASH contiene BCrypt.
+2. Iniciar sesión como OWNER y comprobar que no puede acceder a `/usuarios`, `/roles` ni `/permisos`. Probar también credenciales incorrectas y una cuenta inactiva.
+3. Entrar con permisos administrativos. En `/usuarios`, crear y editar una cuenta; asignarle un segundo rol, quitarlo y comprobar que no se puede quitar el último. Eliminar una cuenta de prueba y comprobar el estado DELETED.
+4. En `/permisos`, crear y editar permisos de prueba. En `/roles`, crear un rol con un permiso, editarlo, asignarle otro permiso y quitarlo. Comprobar que no se puede retirar el último.
+5. Intentar eliminar un rol asignado: debe rechazarse. Quitar su asignación conservando otro rol para el usuario y eliminarlo. Eliminar el permiso de prueba cuando ningún rol quede sin permisos.
+6. Comprobar que ADMIN conserva sus permisos esenciales. Cerrar sesión y abrir otra ruta protegida: debe solicitar login nuevamente.
