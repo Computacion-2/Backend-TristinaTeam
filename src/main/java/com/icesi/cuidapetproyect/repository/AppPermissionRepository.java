@@ -8,4 +8,6 @@ public interface AppPermissionRepository extends JpaRepository<AppPermission, Lo
     Optional<AppPermission> findByPermissionCode(String permissionCode);
 
     boolean existsByPermissionCode(String permissionCode);
+    boolean existsByPermissionNameIgnoreCase(String permissionName);
+    boolean existsByPermissionNameIgnoreCaseAndIdNot(String permissionName, Long id);
 }

@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Formulario de permiso | CuidaPet</title><link rel="stylesheet" th:href="@{/css/styles.css}"></head>
+<body><main class="card">
+<p class="brand">CuidaPet</p><h1 th:text="${editing ? 'Editar permiso' : 'Crear permiso'}"></h1>
+<p class="message error" role="alert" th:if="${error}" th:text="${error}"></p>
+<form method="post" th:object="${permissionForm}" th:action="${editing} ? @{/permisos/{id}/editar(id=${permissionId})} : @{/permisos/crear}">
+<div th:unless="${editing}"><label for="permissionCode">Código</label><input id="permissionCode" th:field="*{permissionCode}" type="text" maxlength="100" pattern="\s*[A-Za-z][A-Za-z0-9_]*\s*" required aria-describedby="code-help">
+<small id="code-help">Ejemplo: VIEW_REPORTS. Se guarda en mayúsculas y no se puede cambiar después.</small></div>
+<div th:if="${editing}"><label for="permissionCodeView">Código</label><input id="permissionCodeView" type="text" th:value="${permissionCode}" readonly></div>
+<label for="permissionName">Nombre</label><input id="permissionName" th:field="*{permissionName}" type="text" maxlength="120" required>
+<label for="description">Descripción</label><textarea id="description" th:field="*{description}" maxlength="300" rows="3"></textarea>
+<button type="submit">Guardar permiso</button>
+</form><p><a th:href="@{/permisos}">Volver al listado</a></p>
+</main></body></html>

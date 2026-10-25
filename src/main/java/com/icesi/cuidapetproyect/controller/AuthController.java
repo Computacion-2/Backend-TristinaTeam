@@ -3,7 +3,6 @@ package com.icesi.cuidapetproyect.controller;
 import com.icesi.cuidapetproyect.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -41,7 +40,7 @@ public class AuthController {
         } catch (IllegalArgumentException ex) {
             redirect.addFlashAttribute("error", ex.getMessage());
             return registrationError(registrationForm, redirect);
-        } catch (IllegalStateException | DataIntegrityViolationException ex) {
+        } catch (RuntimeException ex) {
             redirect.addFlashAttribute("error", "No fue posible registrar la cuenta. Contacta al administrador.");
             return registrationError(registrationForm, redirect);
         }

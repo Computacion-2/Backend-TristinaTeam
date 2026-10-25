@@ -13,11 +13,11 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers("/login", "/register", "/css/**", "/error").permitAll()
-                // Se protegen tanto la API anterior como las futuras vistas MVC.
+                // Las vistas MVC y la API REST comparten las mismas reglas de autorización.
                 .requestMatchers("/users", "/users/**", "/usuarios", "/usuarios/**")
                     .hasAuthority("MANAGE_USERS")
-                .requestMatchers("/roles", "/roles/**", "/permissions", "/permissions/**",
-                        "/permisos", "/permisos/**")
+                .requestMatchers("/roles", "/roles/**", "/permisos", "/permisos/**",
+                        "/api/roles", "/api/roles/**", "/api/permissions", "/api/permissions/**")
                     .hasAuthority("MANAGE_ROLES")
                 .anyRequest().authenticated())
             .formLogin(form -> form.loginPage("/login")

@@ -35,7 +35,7 @@ class SecurityConfigTest {
 
     @Test
     void anonymousVisitorsMustLogin() throws Exception {
-        for (String path : List.of("/", "/users", "/roles", "/permissions", "/usuarios", "/permisos")) {
+        for (String path : List.of("/", "/users", "/roles", "/api/permissions", "/usuarios", "/permisos")) {
             mvc.perform(get(path)).andExpect(status().is3xxRedirection())
                     .andExpect(redirectedUrl("/login"));
         }
@@ -43,7 +43,7 @@ class SecurityConfigTest {
 
     @Test
     void ownerCannotManageUsersRolesOrPermissions() throws Exception {
-        for (String path : List.of("/users", "/roles", "/permissions", "/usuarios", "/permisos")) {
+        for (String path : List.of("/users", "/roles", "/api/permissions", "/usuarios", "/permisos")) {
             mvc.perform(get(path).with(user("owner").roles("OWNER")))
                     .andExpect(status().isForbidden());
         }
@@ -55,7 +55,7 @@ class SecurityConfigTest {
         mvc.perform(get("/users").with(user("manager")
                         .authorities(new SimpleGrantedAuthority("MANAGE_USERS"))))
                 .andExpect(status().isOk());
-        for (String path : List.of("/roles", "/permissions")) {
+        for (String path : List.of("/roles", "/api/permissions")) {
             mvc.perform(get(path).with(user("manager")
                             .authorities(new SimpleGrantedAuthority("MANAGE_ROLES"))))
                     .andExpect(status().isOk());

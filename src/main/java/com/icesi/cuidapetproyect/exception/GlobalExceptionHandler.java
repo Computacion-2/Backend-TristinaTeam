@@ -4,6 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -11,7 +12,8 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-@RestControllerAdvice
+// Solo atiende la API REST; las vistas MVC manejan sus errores con mensajes y redirecciones.
+@RestControllerAdvice(annotations = RestController.class)
 public class GlobalExceptionHandler {
 
     // Cuando los datos enviados no son validos.

@@ -1,0 +1,8 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Error | CuidaPet</title><link rel="stylesheet" th:href="@{/css/styles.css}"></head>
+<body><main class="card"><p class="brand">CuidaPet</p>
+<h1 th:text="${status == 404} ? 'Página no encontrada' : 'No fue posible completar la solicitud'">No fue posible completar la solicitud</h1>
+<p th:if="${status != null}">Código de estado: <strong th:text="${status}"></strong></p>
+<p>Revisa la dirección o vuelve a intentarlo desde el menú principal.</p>
+<a th:href="@{/}">Volver al inicio</a></main></body></html>

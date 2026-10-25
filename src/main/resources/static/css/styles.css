@@ -25,3 +25,13 @@ th { background: #edf5f1; }
 .danger { background: #912c25; }
 .danger:hover { background: #6f201b; }
 button:disabled { opacity: 0.55; cursor: not-allowed; }
+textarea { width: 100%; padding: 11px; margin-top: 6px; border: 1px solid #8ca69e; border-radius: 5px; font: inherit; resize: vertical; }
+textarea:focus-visible, select:focus-visible { outline: 3px solid #be7800; outline-offset: 3px; }
+input[readonly] { background: #edf5f1; color: #52655e; }
+nav { margin-bottom: 8px; }
+code { font-family: Consolas, "Courier New", monospace; font-size: 14px; }
+.tag { display: inline-block; margin-left: 10px; padding: 2px 8px; border-radius: 10px; background: #edf5f1; color: #52655e; font-size: 13px; }
+fieldset { margin-top: 16px; padding: 12px 16px; border: 1px solid #dbe6e2; border-radius: 5px; }
+legend { font-weight: bold; padding: 0 4px; }
+.check { display: flex; align-items: center; gap: 10px; margin-top: 8px; font-weight: normal; }
+.check input { width: auto; margin: 0; }

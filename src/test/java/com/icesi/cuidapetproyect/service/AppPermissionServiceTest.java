@@ -31,8 +31,18 @@ public class AppPermissionServiceTest {
     void setUp() {
         permission = new AppPermission();
         permission.setId(1L);
-        permission.setPermissionName("CREATE_REQUEST");
-        permission.setDescription("Crear solicitudes");
+        permission.setPermissionCode("CREATE_REQUEST");
+        permission.setPermissionName("Crear solicitudes");
+        permission.setDescription("Permite crear solicitudes");
+    }
+
+    private RolePermission assignment(Long roleId, AppPermission assigned) {
+        AppRole role = new AppRole();
+        role.setId(roleId);
+        RolePermission rolePermission = new RolePermission();
+        rolePermission.setRole(role);
+        rolePermission.setPermission(assigned);
+        return rolePermission;
     }
 
     // 1. Consultar todos los permisos
@@ -71,80 +81,122 @@ public class AppPermissionServiceTest {
                 () -> permissionService.findById(1L));
     }
 
-    // 4. Crear un permiso correctamente
+    // 4. Crear un permiso normalizando código, nombre y descripción
     @Test
-    void testCreate() {
+    void testCreateNormalizesFields() {
 
-        when(permissionRepository.findAll())
-                .thenReturn(List.of());
+        AppPermission data = new AppPermission();
+        data.setPermissionCode("  view_reports ");
+        data.setPermissionName("  Ver reportes ");
+        data.setDescription("   ");
 
-        when(permissionRepository.save(permission))
-                .thenReturn(permission);
+        when(permissionRepository.existsByPermissionCode("VIEW_REPORTS"))
+                .thenReturn(false);
+        when(permissionRepository.existsByPermissionNameIgnoreCase("Ver reportes"))
+                .thenReturn(false);
+        when(permissionRepository.save(data))
+                .thenReturn(data);
 
-        AppPermission result = permissionService.create(permission);
+        AppPermission result = permissionService.create(data);
 
-        assertEquals("CREATE_REQUEST",
-                result.getPermissionName());
-
-        verify(permissionRepository).save(permission);
+        assertEquals("VIEW_REPORTS", result.getPermissionCode());
+        assertEquals("Ver reportes", result.getPermissionName());
+        assertNull(result.getDescription());
+        verify(permissionRepository).save(data);
     }
 
-    // 5. No crear un permiso con nombre duplicado
+    // 5. No crear un permiso con código duplicado
+    @Test
+    void testCreateDuplicateCode() {
+
+        when(permissionRepository.existsByPermissionCode("CREATE_REQUEST"))
+                .thenReturn(true);
+
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> permissionService.create(permission));
+
+        assertEquals("Ya existe un permiso con ese código", ex.getMessage());
+        verify(permissionRepository, never()).save(any());
+    }
+
+    // 6. No crear un permiso con nombre duplicado
     @Test
     void testCreateDuplicateName() {
 
-        when(permissionRepository.findAll())
-                .thenReturn(List.of(permission));
+        when(permissionRepository.existsByPermissionCode("CREATE_REQUEST"))
+                .thenReturn(false);
+        when(permissionRepository.existsByPermissionNameIgnoreCase("Crear solicitudes"))
+                .thenReturn(true);
 
-        assertThrows(RuntimeException.class,
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> permissionService.create(permission));
+
+        assertEquals("Ya existe un permiso con ese nombre", ex.getMessage());
+        verify(permissionRepository, never()).save(any());
+    }
+
+    // 7. No crear un permiso sin código o con caracteres inválidos
+    @Test
+    void testCreateInvalidCode() {
+
+        permission.setPermissionCode(" ");
+        assertThrows(IllegalArgumentException.class,
+                () -> permissionService.create(permission));
+
+        permission.setPermissionCode("1-INVALID");
+        assertThrows(IllegalArgumentException.class,
+                () -> permissionService.create(permission));
+
+        verifyNoInteractions(permissionRepository);
+    }
+
+    // 8. No crear un permiso sin nombre
+    @Test
+    void testCreateWithoutName() {
+
+        permission.setPermissionName(null);
+
+        assertThrows(IllegalArgumentException.class,
                 () -> permissionService.create(permission));
 
         verify(permissionRepository, never()).save(any());
     }
 
-    // 6. Actualizar correctamente un permiso
+    // 9. Actualizar nombre y descripción sin cambiar el código
     @Test
     void testUpdate() {
 
         AppPermission data = new AppPermission();
-        data.setPermissionName("EDIT_REQUEST");
-        data.setDescription("Editar solicitudes");
+        data.setPermissionCode("OTRO_CODIGO");
+        data.setPermissionName(" Editar solicitudes ");
+        data.setDescription("Editar solicitudes de cuidado");
 
         when(permissionRepository.findById(1L))
                 .thenReturn(Optional.of(permission));
-
-        when(permissionRepository.findAll())
-                .thenReturn(List.of(permission));
-
+        when(permissionRepository.existsByPermissionNameIgnoreCaseAndIdNot("Editar solicitudes", 1L))
+                .thenReturn(false);
         when(permissionRepository.save(permission))
                 .thenReturn(permission);
 
         AppPermission result =
                 permissionService.update(1L, data);
 
-        assertEquals("EDIT_REQUEST",
-                result.getPermissionName());
-
-        assertEquals("Editar solicitudes",
-                result.getDescription());
+        assertEquals("CREATE_REQUEST", result.getPermissionCode());
+        assertEquals("Editar solicitudes", result.getPermissionName());
+        assertEquals("Editar solicitudes de cuidado", result.getDescription());
     }
 
-    // 7. No actualizar con un nombre que ya existe
+    // 10. No actualizar con un nombre que ya tiene otro permiso
     @Test
     void testUpdateDuplicateName() {
 
-        AppPermission otherPermission = new AppPermission();
-        otherPermission.setId(2L);
-        otherPermission.setPermissionName("EDIT_REQUEST");
-
         AppPermission data = new AppPermission();
-        data.setPermissionName("EDIT_REQUEST");
+        data.setPermissionName("Editar solicitudes");
 
         when(permissionRepository.findById(1L))
                 .thenReturn(Optional.of(permission));
-
-        when(permissionRepository.findAll())
-                .thenReturn(List.of(permission, otherPermission));
+        when(permissionRepository.existsByPermissionNameIgnoreCaseAndIdNot("Editar solicitudes", 1L))
+                .thenReturn(true);
 
         assertThrows(RuntimeException.class,
                 () -> permissionService.update(1L, data));
@@ -152,109 +204,93 @@ public class AppPermissionServiceTest {
         verify(permissionRepository, never()).save(any());
     }
 
-    // 8. Eliminar un permiso que no está asignado a roles
+    // 11. No actualizar un permiso inexistente
+    @Test
+    void testUpdateNotFound() {
+
+        when(permissionRepository.findById(9L))
+                .thenReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class,
+                () -> permissionService.update(9L, permission));
+
+        verify(permissionRepository, never()).save(any());
+    }
+
+    // 12. Eliminar un permiso que no está asignado a roles
     @Test
     void testDeleteWithoutRoles() {
 
         when(permissionRepository.findById(1L))
                 .thenReturn(Optional.of(permission));
-
-        when(rolePermissionRepository.findAll())
+        when(rolePermissionRepository.findByPermission_Id(1L))
                 .thenReturn(List.of());
 
         permissionService.delete(1L);
 
-        verify(rolePermissionRepository)
-                .deleteAll(anyList());
-
+        verify(rolePermissionRepository).deleteAll(List.of());
         verify(rolePermissionRepository).flush();
-
         verify(permissionRepository).delete(permission);
     }
 
-    // 9. No eliminar el último permiso de un rol
+    // 13. No eliminar el último permiso de un rol
     @Test
     void testDeleteLastPermission() {
 
-        AppRole role = new AppRole();
-        role.setId(1L);
-
-        RolePermission assignment = new RolePermission();
-        assignment.setRole(role);
-        assignment.setPermission(permission);
+        RolePermission onlyAssignment = assignment(5L, permission);
 
         when(permissionRepository.findById(1L))
                 .thenReturn(Optional.of(permission));
-
-        when(rolePermissionRepository.findAll())
-                .thenReturn(List.of(assignment));
+        when(rolePermissionRepository.findByPermission_Id(1L))
+                .thenReturn(List.of(onlyAssignment));
+        when(rolePermissionRepository.findByRole_Id(5L))
+                .thenReturn(List.of(onlyAssignment));
 
         assertThrows(RuntimeException.class,
                 () -> permissionService.delete(1L));
 
+        verify(rolePermissionRepository, never()).deleteAll(anyList());
         verify(permissionRepository, never()).delete(any());
     }
 
-    // 10. Eliminar un permiso si el rol tiene otro
+    // 14. Eliminar un permiso si el rol conserva otro
     @Test
     void testDeleteWithOtherPermissions() {
-
-        AppRole role = new AppRole();
-        role.setId(1L);
 
         AppPermission otherPermission = new AppPermission();
         otherPermission.setId(2L);
 
-        RolePermission assignment1 = new RolePermission();
-        assignment1.setRole(role);
-        assignment1.setPermission(permission);
-
-        RolePermission assignment2 = new RolePermission();
-        assignment2.setRole(role);
-        assignment2.setPermission(otherPermission);
+        RolePermission assignment1 = assignment(5L, permission);
+        RolePermission assignment2 = assignment(5L, otherPermission);
 
         when(permissionRepository.findById(1L))
                 .thenReturn(Optional.of(permission));
-
-        when(rolePermissionRepository.findAll())
+        when(rolePermissionRepository.findByPermission_Id(1L))
+                .thenReturn(List.of(assignment1));
+        when(rolePermissionRepository.findByRole_Id(5L))
                 .thenReturn(List.of(assignment1, assignment2));
 
         permissionService.delete(1L);
 
-        verify(rolePermissionRepository)
-                .deleteAll(List.of(assignment1));
-
+        verify(rolePermissionRepository).deleteAll(List.of(assignment1));
         verify(rolePermissionRepository).flush();
-
         verify(permissionRepository).delete(permission);
     }
 
-
+    // 15. No eliminar los permisos que usa la configuración de seguridad
     @Test
-    void testUpdateWithDifferentPermission() {
+    void testDeleteSystemPermission() {
 
-        AppPermission otherPermission = new AppPermission();
-        otherPermission.setId(2L);
-        otherPermission.setPermissionName("DELETE_REQUEST");
-
-        AppPermission data = new AppPermission();
-        data.setPermissionName("EDIT_REQUEST");
-        data.setDescription("Editar solicitudes");
+        permission.setPermissionCode("MANAGE_ROLES");
 
         when(permissionRepository.findById(1L))
                 .thenReturn(Optional.of(permission));
 
-        when(permissionRepository.findAll())
-                .thenReturn(List.of(permission, otherPermission));
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> permissionService.delete(1L));
 
-        when(permissionRepository.save(permission))
-                .thenReturn(permission);
-
-        AppPermission result = permissionService.update(1L, data);
-
-        assertEquals("EDIT_REQUEST", result.getPermissionName());
-        assertEquals("Editar solicitudes", result.getDescription());
-
-        verify(permissionRepository).save(permission);
+        assertEquals("No se puede eliminar un permiso requerido por el sistema", ex.getMessage());
+        verifyNoInteractions(rolePermissionRepository);
+        verify(permissionRepository, never()).delete(any());
     }
 }

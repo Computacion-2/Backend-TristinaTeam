@@ -37,7 +37,7 @@ class AppPermissionControllerHttpTest {
     @Test
     void findAllHttpTest() throws Exception {
 
-        mockMvc.perform(get("/permissions"))
+        mockMvc.perform(get("/api/permissions"))
                 .andExpect(status().isOk());
 
         verify(permissionService).findAll();
@@ -55,7 +55,7 @@ class AppPermissionControllerHttpTest {
         when(permissionService.findById(1L))
                 .thenReturn(permission);
 
-        mockMvc.perform(get("/permissions/1"))
+        mockMvc.perform(get("/api/permissions/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.permissionCode").value("TEST"));
@@ -73,7 +73,7 @@ class AppPermissionControllerHttpTest {
         when(permissionService.create(any(AppPermission.class)))
                 .thenReturn(permission);
 
-        mockMvc.perform(post("/permissions/create")
+        mockMvc.perform(post("/api/permissions/create")
                         .contentType("application/json")
                         .content("""
                                 {
@@ -98,7 +98,7 @@ class AppPermissionControllerHttpTest {
         when(permissionService.update(eq(1L), any(AppPermission.class)))
                 .thenReturn(permission);
 
-        mockMvc.perform(post("/permissions/update/1")
+        mockMvc.perform(post("/api/permissions/update/1")
                         .contentType("application/json")
                         .content("""
                                 {
@@ -115,7 +115,7 @@ class AppPermissionControllerHttpTest {
     @Test
     void deleteHttpTest() throws Exception {
 
-        mockMvc.perform(post("/permissions/delete/1"))
+        mockMvc.perform(post("/api/permissions/delete/1"))
                 .andExpect(status().isOk());
 
         verify(permissionService).delete(1L);
@@ -128,7 +128,7 @@ class AppPermissionControllerHttpTest {
         when(permissionService.findById(999L))
                 .thenThrow(new RuntimeException("Permiso no encontrado"));
 
-        mockMvc.perform(get("/permissions/999"))
+        mockMvc.perform(get("/api/permissions/999"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error")
                         .value("Permiso no encontrado"));

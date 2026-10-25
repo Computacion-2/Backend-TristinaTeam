@@ -23,7 +23,7 @@ public class AppPermission {
     @Column(name = "permission_code", nullable = false, unique = true, length = 100)
     private String permissionCode;
 
-    @NotBlank(message = "El código del permiso es obligatorio")
+    @NotBlank(message = "El nombre del permiso es obligatorio")
     @Column(name = "permission_name", nullable = false, length = 120)
     private String permissionName;
 
