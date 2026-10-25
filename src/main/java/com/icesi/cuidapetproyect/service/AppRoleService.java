@@ -5,10 +5,18 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class AppRoleService {
+
+    // ADMIN administra el módulo y OWNER se asigna en el registro público.
+    public static final Set<String> SYSTEM_ROLES = Set.of("ADMIN", "OWNER");
+
+    private static final String ADMIN_ROLE = "ADMIN";
+    private static final String NAME_PATTERN = "[A-Z][A-Z0-9_]{0,59}";
 
     private final AppRoleRepository roleRepository;
     private final AppPermissionRepository permissionRepository;
@@ -27,6 +35,15 @@ public class AppRoleService {
                         new RuntimeException("Rol no encontrado"));
     }
 
+    // Consultar los permisos asignados a un rol
+    @Transactional(readOnly = true)
+    public List<AppPermission> findPermissions(Long roleId) {
+        findById(roleId);
+        return rolePermissionRepository.findByRole_Id(roleId).stream()
+                .map(RolePermission::getPermission)
+                .toList();
+    }
+
     // Crear un rol con sus permisos
     @Transactional
     public AppRole create(AppRole role, List<Long> permissionIds) {
@@ -37,8 +54,10 @@ public class AppRoleService {
                     "El rol debe tener al menos un permiso");
         }
 
+        String name = normalizeName(role.getRoleName());
+
         // Evitar nombres duplicados
-        if (roleRepository.existsByRoleName(role.getRoleName())) {
+        if (roleRepository.existsByRoleName(name)) {
             throw new RuntimeException(
                     "Ya existe un rol con ese nombre");
         }
@@ -51,6 +70,10 @@ public class AppRoleService {
                                 new RuntimeException(
                                         "Permiso no encontrado: " + id)))
                 .toList();
+
+        role.setRoleName(name);
+        role.setDescription(normalizeDescription(role.getDescription()));
+        role.setActiveFlag(normalizeActiveFlag(role.getActiveFlag(), "Y"));
 
         // Guardar el rol
         AppRole savedRole = roleRepository.save(role);
@@ -74,17 +97,26 @@ public class AppRoleService {
     public AppRole update(Long id, AppRole data) {
 
         AppRole role = findById(id);
+        String name = normalizeName(data.getRoleName());
+        String activeFlag = normalizeActiveFlag(data.getActiveFlag(), role.getActiveFlag());
+
+        // Los roles del sistema conservan su nombre y permanecen activos
+        if (isSystemRole(role)
+                && (!role.getRoleName().equals(name) || !"Y".equals(activeFlag))) {
+            throw new RuntimeException(
+                    "El rol " + role.getRoleName() + " no se puede renombrar ni desactivar");
+        }
 
         // Comprobar que el nombre no esté repetido
-        if (!role.getRoleName().equals(data.getRoleName())
-                && roleRepository.existsByRoleName(data.getRoleName())) {
+        if (!role.getRoleName().equals(name)
+                && roleRepository.existsByRoleName(name)) {
             throw new RuntimeException(
                     "Ya existe un rol con ese nombre");
         }
 
-        role.setRoleName(data.getRoleName());
-        role.setDescription(data.getDescription());
-        role.setActiveFlag(data.getActiveFlag());
+        role.setRoleName(name);
+        role.setDescription(normalizeDescription(data.getDescription()));
+        role.setActiveFlag(activeFlag);
 
         return roleRepository.save(role);
     }
@@ -121,7 +153,7 @@ public class AppRoleService {
     @Transactional
     public void removePermission(Long roleId, Long permissionId) {
 
-        findById(roleId);
+        AppRole role = findById(roleId);
 
         List<RolePermission> permissions =
                 rolePermissionRepository.findByRole_Id(roleId);
@@ -141,6 +173,17 @@ public class AppRoleService {
                     "No se puede dejar el rol sin permisos");
         }
 
+        // ADMIN debe conservar los permisos que dan acceso a la administración
+        if (ADMIN_ROLE.equals(role.getRoleName())
+                && permissions.stream()
+                .map(RolePermission::getPermission)
+                .anyMatch(permission -> permissionId.equals(permission.getId())
+                        && AppPermissionService.SYSTEM_PERMISSIONS
+                        .contains(permission.getPermissionCode()))) {
+            throw new RuntimeException(
+                    "El rol ADMIN debe conservar los permisos de administración");
+        }
+
         rolePermissionRepository.deleteById(id);
     }
 
@@ -149,6 +192,11 @@ public class AppRoleService {
     public void delete(Long id) {
 
         AppRole role = findById(id);
+
+        if (isSystemRole(role)) {
+            throw new RuntimeException(
+                    "No se puede eliminar el rol " + role.getRoleName());
+        }
 
         // Impedir eliminar un rol asignado a usuarios
         if (!userRoleRepository.findByRole_Id(id).isEmpty()) {
@@ -165,5 +213,35 @@ public class AppRoleService {
 
         // Eliminar el rol
         roleRepository.delete(role);
+    }
+
+    public boolean isSystemRole(AppRole role) {
+        return role.getRoleName() != null && SYSTEM_ROLES.contains(role.getRoleName());
+    }
+
+    private String normalizeName(String name) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("El nombre del rol es obligatorio");
+        }
+        String normalized = name.trim().toUpperCase(Locale.ROOT);
+        if (!normalized.matches(NAME_PATTERN)) {
+            throw new IllegalArgumentException(
+                    "El nombre del rol debe empezar por una letra y solo admite letras, números y guion bajo");
+        }
+        return normalized;
+    }
+
+    private String normalizeActiveFlag(String activeFlag, String defaultValue) {
+        if (activeFlag == null || activeFlag.isBlank()) {
+            return defaultValue;
+        }
+        if (!"Y".equals(activeFlag) && !"N".equals(activeFlag)) {
+            throw new IllegalArgumentException("El estado del rol debe ser Y o N");
+        }
+        return activeFlag;
+    }
+
+    private String normalizeDescription(String description) {
+        return description == null || description.isBlank() ? null : description.trim();
     }
 }

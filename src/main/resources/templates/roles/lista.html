@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Roles | CuidaPet</title><link rel="stylesheet" th:href="@{/css/styles.css}"></head>
+<body><main class="card wide">
+<p class="brand">CuidaPet</p><h1>Roles</h1>
+<nav><a th:href="@{/}">Inicio</a> · <a th:href="@{/permisos}">Permisos</a> · <a th:href="@{/roles/nuevo}">Crear rol</a></nav>
+<p class="message" role="status" th:if="${message}" th:text="${message}"></p>
+<p class="message error" role="alert" th:if="${error}" th:text="${error}"></p>
+<p th:if="${#lists.isEmpty(roles)}">Todavía no hay roles.</p>
+<div class="table-scroll" th:unless="${#lists.isEmpty(roles)}"><table>
+<caption>Solo se pueden eliminar los roles que no están asignados a usuarios. ADMIN y OWNER son roles del sistema.</caption>
+<thead><tr><th scope="col">ID</th><th scope="col">Nombre</th><th scope="col">Descripción</th><th scope="col">Estado</th><th scope="col">Acciones</th></tr></thead>
+<tbody><tr th:each="role : ${roles}"><td th:text="${role.id}"></td><td th:text="${role.roleName}"></td>
+<td th:text="${role.description}"></td><td th:text="${role.activeFlag == 'Y' ? 'Activo' : 'Inactivo'}"></td>
+<td><a th:href="@{/roles/{id}/editar(id=${role.id})}">Editar</a>
+<form class="inline-form" method="post" th:unless="${#sets.contains(systemRoles, role.roleName)}" th:action="@{/roles/{id}/eliminar(id=${role.id})}"><button class="danger" type="submit">Eliminar</button></form>
+<span class="tag" th:if="${#sets.contains(systemRoles, role.roleName)}">Sistema</span></td>
+</tr></tbody></table></div>
+</main></body></html>

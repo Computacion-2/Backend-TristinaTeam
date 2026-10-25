@@ -35,7 +35,7 @@ class SecurityConfigTest {
 
     @Test
     void anonymousVisitorsMustLogin() throws Exception {
-        for (String path : List.of("/", "/users", "/roles", "/api/permissions", "/usuarios", "/permisos")) {
+        for (String path : List.of("/", "/users", "/api/roles", "/api/permissions", "/usuarios", "/roles", "/permisos")) {
             mvc.perform(get(path)).andExpect(status().is3xxRedirection())
                     .andExpect(redirectedUrl("/login"));
         }
@@ -43,7 +43,7 @@ class SecurityConfigTest {
 
     @Test
     void ownerCannotManageUsersRolesOrPermissions() throws Exception {
-        for (String path : List.of("/users", "/roles", "/api/permissions", "/usuarios", "/permisos")) {
+        for (String path : List.of("/users", "/api/roles", "/api/permissions", "/usuarios", "/roles", "/permisos")) {
             mvc.perform(get(path).with(user("owner").roles("OWNER")))
                     .andExpect(status().isForbidden());
         }
@@ -55,14 +55,16 @@ class SecurityConfigTest {
         mvc.perform(get("/users").with(user("manager")
                         .authorities(new SimpleGrantedAuthority("MANAGE_USERS"))))
                 .andExpect(status().isOk());
-        for (String path : List.of("/roles", "/api/permissions")) {
+        for (String path : List.of("/api/roles", "/api/permissions")) {
             mvc.perform(get(path).with(user("manager")
                             .authorities(new SimpleGrantedAuthority("MANAGE_ROLES"))))
                     .andExpect(status().isOk());
         }
-        mvc.perform(get("/roles").with(user("manager")
-                        .authorities(new SimpleGrantedAuthority("MANAGE_USERS"))))
-                .andExpect(status().isForbidden());
+        for (String path : List.of("/roles", "/api/roles", "/permisos", "/api/permissions")) {
+            mvc.perform(get(path).with(user("manager")
+                            .authorities(new SimpleGrantedAuthority("MANAGE_USERS"))))
+                    .andExpect(status().isForbidden());
+        }
     }
 
     @Test

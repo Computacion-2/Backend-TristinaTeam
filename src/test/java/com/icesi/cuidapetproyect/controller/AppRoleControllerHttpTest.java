@@ -47,7 +47,7 @@ class AppRoleControllerHttpTest {
         when(roleService.findAll())
                 .thenReturn(List.of(role));
 
-        mockMvc.perform(get("/roles"))
+        mockMvc.perform(get("/api/roles"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1))
                 .andExpect(jsonPath("$[0].roleName")
@@ -67,7 +67,7 @@ class AppRoleControllerHttpTest {
         when(roleService.findById(1L))
                 .thenReturn(role);
 
-        mockMvc.perform(get("/roles/1"))
+        mockMvc.perform(get("/api/roles/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.roleName")
@@ -91,7 +91,7 @@ class AppRoleControllerHttpTest {
                 eq(List.of(2L, 3L))
         )).thenReturn(role);
 
-        mockMvc.perform(post("/roles/create")
+        mockMvc.perform(post("/api/roles/create")
                         .param("permissionIds", "2", "3")
                         .contentType("application/json")
                         .content("""
@@ -126,7 +126,7 @@ class AppRoleControllerHttpTest {
                 any(AppRole.class)
         )).thenReturn(role);
 
-        mockMvc.perform(post("/roles/update/1")
+        mockMvc.perform(post("/api/roles/update/1")
                         .contentType("application/json")
                         .content("""
                                 {
@@ -148,7 +148,7 @@ class AppRoleControllerHttpTest {
     @Test
     void deleteHttpTest() throws Exception {
 
-        mockMvc.perform(post("/roles/delete/1"))
+        mockMvc.perform(post("/api/roles/delete/1"))
                 .andExpect(status().isOk());
 
         verify(roleService).delete(1L);
@@ -159,7 +159,7 @@ class AppRoleControllerHttpTest {
     void assignPermissionHttpTest() throws Exception {
 
         mockMvc.perform(
-                post("/roles/1/assign-permission/3")
+                post("/api/roles/1/assign-permission/3")
         ).andExpect(status().isOk());
 
         verify(roleService).assignPermission(1L, 3L);
@@ -170,7 +170,7 @@ class AppRoleControllerHttpTest {
     void removePermissionHttpTest() throws Exception {
 
         mockMvc.perform(
-                post("/roles/1/remove-permission/3")
+                post("/api/roles/1/remove-permission/3")
         ).andExpect(status().isOk());
 
         verify(roleService).removePermission(1L, 3L);
@@ -185,7 +185,7 @@ class AppRoleControllerHttpTest {
                         new RuntimeException("Rol no encontrado")
                 );
 
-        mockMvc.perform(get("/roles/999"))
+        mockMvc.perform(get("/api/roles/999"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error")
                         .value("Rol no encontrado"));
@@ -200,7 +200,7 @@ class AppRoleControllerHttpTest {
         )).when(roleService).removePermission(1L, 3L);
 
         mockMvc.perform(
-                        post("/roles/1/remove-permission/3")
+                        post("/api/roles/1/remove-permission/3")
                 )
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.error")

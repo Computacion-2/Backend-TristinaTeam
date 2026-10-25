@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Formulario de rol | CuidaPet</title><link rel="stylesheet" th:href="@{/css/styles.css}"></head>
+<body><main class="card">
+<p class="brand">CuidaPet</p><h1 th:text="${editing ? 'Editar rol' : 'Crear rol'}"></h1>
+<p class="message error" role="alert" th:if="${error}" th:text="${error}"></p>
+<form method="post" th:object="${roleForm}" th:action="${editing} ? @{/roles/{id}/editar(id=${roleId})} : @{/roles/crear}">
+<label for="roleName">Nombre</label><input id="roleName" th:field="*{roleName}" type="text" maxlength="60" pattern="\s*[A-Za-z][A-Za-z0-9_]*\s*" th:readonly="${systemRole}" required aria-describedby="name-help">
+<small id="name-help" th:text="${systemRole} ? 'Rol del sistema: no se puede renombrar, desactivar ni eliminar.' : 'Ejemplo: PET_WALKER. Se guarda en mayúsculas; Spring Security lo expone como ROLE_ seguido del nombre.'"></small>
+<label for="description">Descripción</label><textarea id="description" th:field="*{description}" maxlength="300" rows="3"></textarea>
+<div th:unless="${systemRole}"><label for="activeFlag">Estado</label><select id="activeFlag" th:field="*{activeFlag}"><option value="Y">Activo</option><option value="N">Inactivo</option></select>
+<small>Un rol inactivo no concede permisos aunque siga asignado.</small></div>
+<input type="hidden" th:if="${systemRole}" name="activeFlag" value="Y">
+<fieldset th:unless="${editing}"><legend>Permisos iniciales</legend>
+<p th:if="${#lists.isEmpty(permissions)}">No hay permisos registrados. Crea uno antes de crear el rol.</p>
+<label class="check" th:each="permission : ${permissions}"><input type="checkbox" th:field="*{permissionIds}" th:value="${permission.id}"><span><strong th:text="${permission.permissionCode}"></strong> · <span th:text="${permission.permissionName}"></span></span></label>
+<small>Selecciona al menos un permiso. Después podrás añadir o quitar permisos desde la pantalla de permisos del rol.</small></fieldset>
+<button type="submit">Guardar rol</button>
+</form><p><a th:href="@{/roles}">Volver al listado</a></p>
+</main></body></html>
