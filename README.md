@@ -121,7 +121,34 @@ Los usuarios cargados mediante los scripts SQL son registros de prueba y no cuen
 
 Las pantallas y la API REST corresponden a la administración de usuarios, roles y permisos. Las demás entidades forman parte del modelo de persistencia JPA.
 
-El proyecto genera `target/cuidapet.war` con `clean verify` y dispone del perfil `iaslab`. Tomcat conserva el alcance `provided` y la aplicación incluye el inicializador para un contenedor externo. La [guía de ejecución y empaquetado](docs/DESPLIEGUE.md) explica cómo ejecutar el WAR localmente. Esta entrega no requiere un despliegue físico en IAsLab.
+El proyecto genera `target/cuidapet.war` y dispone del perfil `iaslab`. Tomcat conserva el alcance `provided` y la aplicación incluye el inicializador para un contenedor externo. La [guía de ejecución y empaquetado](docs/DESPLIEGUE.md) explica cómo ejecutar el WAR localmente. Esta entrega no requiere un despliegue físico en IAsLab.
+
+## 10. Archivo desplegable (WAR)
+
+El archivo desplegable es `target/cuidapet.war`. La carpeta `target/` no se versiona (está en `.gitignore`), por lo que el WAR se genera a partir del código del repositorio con Java 21:
+
+```bash
+# Suite completa y WAR; contextLoads necesita Oracle y DB_PASSWORD
+./mvnw clean verify
+
+# WAR sin la prueba que se conecta a Oracle (212 pruebas)
+./mvnw clean package '-Dtest=!CuidaPetProyectApplicationTests'
+```
+
+En Windows con PowerShell se usa `.\mvnw.cmd` en lugar de `./mvnw`.
+
+El WAR es compatible con Apache Tomcat 11 (Jakarta Servlet 6.1) y Java 21, como el Tomcat de IAsLab. El Tomcat embebido queda en `WEB-INF/lib-provided`, de modo que el mismo archivo funciona en un Tomcat externo y con `java -jar target/cuidapet.war`. Desplegado con el nombre `cuidapet.war`, la aplicación queda en la ruta `/cuidapet`, por ejemplo `/cuidapet/login`.
+
+Para desplegarlo en un Tomcat externo, el proceso de Tomcat debe definir estas variables antes de iniciar la aplicación; sin ellas el contexto no arranca:
+
+| Variable | Valor |
+|---|---|
+| `SPRING_PROFILES_ACTIVE` | `iaslab` |
+| `DB_URL` | URL JDBC del Oracle accesible desde el servidor, por ejemplo `jdbc:oracle:thin:@<host>:1521/<servicio>` |
+| `DB_USER` | Usuario dueño del esquema creado con los scripts de `src/main/resources/sql` |
+| `DB_PASSWORD` | Contraseña de ese usuario (no se guarda en el repositorio) |
+
+El esquema debe existir antes del despliegue (`01_creacion.sql` y `02_datos_iniciales.sql`), porque la aplicación usa `ddl-auto=validate`. Para administrar el módulo, registrar una cuenta en `/cuidapet/register` y asignarle el rol ADMIN como se indica en [la guía MVC](docs/TALLER_MVC.md).
 
 ## Video de funcionamiento
 [Ver demostración de CuidaPet](https://drive.google.com/file/d/1CuUJEpwXpszjL59R-BCdbdwqss7HutJX/view?usp=sharing)
