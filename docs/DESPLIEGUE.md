@@ -1,6 +1,6 @@
 # Ejecución y empaquetado de CuidaPet
 
-Esta guía explica la configuración de Oracle, la ejecución local, las pruebas y la generación de cuidapet.war. El proyecto conserva el empaquetado WAR y el inicializador para un contenedor externo. La entrega del módulo MVC no requiere un despliegue físico en IAsLab.
+Esta guía explica la configuración de Oracle, la ejecución local, las pruebas y la generación de cuidapet.war. El proyecto conserva el empaquetado WAR y el inicializador para un contenedor externo. El nuevo taller Backend requiere comprobar el despliegue real; generar el WAR no completa ese requisito.
 
 ## Requisitos
 
@@ -18,6 +18,8 @@ Referencias oficiales: [despliegue WAR de Spring Boot](https://docs.spring.io/sp
 | DB_URL | URL JDBC de Oracle | jdbc:oracle:thin:@localhost:1521/XEPDB1 |
 | DB_USER | Usuario de Oracle | cuidapet |
 | DB_PASSWORD | Contraseña de Oracle | Obligatoria, sin valor guardado |
+| JWT_SECRET | Clave aleatoria Base64 de al menos 32 bytes | Obligatoria, sin valor guardado |
+| JWT_EXPIRATION_MINUTES | Duración del token REST, entre 1 y 1440 minutos | 30 |
 | PORT | Puerto del servidor integrado | 8080 |
 | SHOW_SQL | Mostrar SQL durante desarrollo | false |
 | SPRING_PROFILES_ACTIVE | Perfil opcional del servidor | Usar iaslab al desplegar |
@@ -39,6 +41,12 @@ $env:DB_USER = 'cuidapet'
 $claveOracle = Read-Host 'Contraseña de Oracle' -AsSecureString
 $env:DB_PASSWORD = [System.Net.NetworkCredential]::new('', $claveOracle).Password
 $claveOracle.Dispose()
+# Generar una clave local para esta sesión; en el servidor conservarla en su entorno.
+$jwtBytes = New-Object byte[] 32
+$jwtGenerator = [System.Security.Cryptography.RandomNumberGenerator]::Create()
+$jwtGenerator.GetBytes($jwtBytes)
+$jwtGenerator.Dispose()
+$env:JWT_SECRET = [Convert]::ToBase64String($jwtBytes)
 .\mvnw.cmd spring-boot:run
 ```
 
@@ -52,7 +60,7 @@ En la misma terminal con Oracle configurado y el esquema preparado:
 .\mvnw.cmd clean verify
 ```
 
-El resultado es `target/cuidapet.war`; el informe de cobertura queda en `target/site/jacoco/index.html`. Las pruebas de servicios y controladores utilizan dobles de prueba; contextLoads sí abre una conexión a Oracle para validar el esquema. Para ejecutar contra el esquema de pruebas, definir TEST_DB_URL y TEST_DB_USER y solicitar su contraseña:
+El resultado es `target/cuidapet.war`; el informe de cobertura queda en `target/site/jacoco/index.html`. Las pruebas unitarias utilizan dobles de prueba; contextLoads y ApiAuthenticationTest abren una conexión a Oracle para validar el esquema. Las pruebas de arranque usan una clave JWT exclusiva de pruebas. Para ejecutar contra el esquema de pruebas, definir TEST_DB_URL y TEST_DB_USER y solicitar su contraseña:
 
 ```powershell
 $clavePruebas = Read-Host 'Contraseña de Oracle de pruebas' -AsSecureString
@@ -64,14 +72,14 @@ $clavePruebas.Dispose()
 El esquema de pruebas debe existir y estar preparado. Para verificar solamente los servicios y controladores sin Oracle:
 
 ```powershell
-.\mvnw.cmd test '-Dtest=*Test'
+.\mvnw.cmd test '-Dtest=*Test,!ApiAuthenticationTest'
 ```
 
-Esta selección incluye las clases terminadas en Test, pero no CuidaPetProyectApplicationTests, que es la prueba de arranque con Oracle. No usarla como sustituto de clean verify para la entrega final.
+Esta selección excluye CuidaPetProyectApplicationTests y ApiAuthenticationTest, que requieren Oracle. No usarla como sustituto de clean verify para la entrega final.
 
 ## Ejecutar el WAR localmente
 
-Con DB_PASSWORD configurada, ejecutar:
+Con DB_PASSWORD y JWT_SECRET configuradas, ejecutar:
 
 ```powershell
 & "$env:JAVA_HOME\bin\java.exe" -jar target/cuidapet.war --server.port=8081 --server.servlet.context-path=/cuidapet
@@ -93,7 +101,9 @@ Comprobar:
 
 El `pom.xml` conserva `packaging=war`, `finalName=cuidapet` y Tomcat con alcance `provided`. `CuidaPetProyectApplication` extiende `SpringBootServletInitializer` e implementa `configure`.
 
-El perfil `iaslab` permite obtener DB_URL, DB_USER y DB_PASSWORD del proceso que ejecuta el contenedor. En un Tomcat externo compatible, el nombre `cuidapet.war` determina por defecto el contexto `/cuidapet`; el puerto lo define Tomcat. PORT solo aplica al servidor integrado. Esta configuración forma parte del proyecto y el despliegue externo es opcional para esta entrega.
+El perfil `iaslab` permite obtener DB_URL, DB_USER y DB_PASSWORD del proceso que ejecuta el contenedor; JWT_SECRET también debe estar configurada. En un Tomcat externo compatible, el nombre `cuidapet.war` determina por defecto el contexto `/cuidapet`; el puerto lo define Tomcat. PORT solo aplica al servidor integrado. El despliegue externo del taller Backend sigue pendiente de comprobar.
+
+La [guía JWT](API_JWT.md) describe Swagger, Postman y la autenticación REST.
 
 ## Problemas frecuentes
 

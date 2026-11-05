@@ -139,9 +139,24 @@ Los servicios deberán reemplazar esas referencias por entidades existentes y
 validadas antes de persistir. assignedBy se obtiene del usuario autenticado.
 No se deben usar los mappers para saltarse validaciones del negocio.
 
-Pendiente después de este commit: conectar estos DTOs a controladores REST,
+Pendiente al terminar el primer commit: conectar estos DTOs a controladores REST,
 JWT, nueva cadena, CRUD completo de las 23 entidades, Swagger, Postman,
 validación de despliegue y videos. Este primer commit no cambia los endpoints ni el MVC.
+
+## Qué incluye el segundo commit de Juan Pablo
+
+- POST /api/v1/auth/login y GET /api/v1/auth/me.
+- JWT firmado, con usuario, roles, permisos, emisión y vencimiento; clave por entorno.
+- Filtro Bearer de Spring Security y cadena REST independiente de MVC.
+- Respuestas JSON 401/403 y comprobación del estado/permisos actuales de la cuenta.
+- Configuración Swagger y documentación de los dos endpoints.
+- Colección y entorno Postman iniciales, sin credenciales reales.
+- Pruebas de firma, vencimiento, login, autorizaciones y separación de las dos cadenas.
+
+Consultar [API_JWT.md](API_JWT.md) para configurar JWT_SECRET, ejecutar y probar.
+El tercer commit agregará los CRUD de las cinco entidades de seguridad; las otras
+18 entidades siguen asignadas a Valentina y Gordillo. Swagger y Postman se ampliarán
+con cada bloque. El despliegue y los videos siguen pendientes.
 
 ## Verificación
 

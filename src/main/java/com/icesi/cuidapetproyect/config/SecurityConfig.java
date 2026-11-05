@@ -2,6 +2,7 @@ package com.icesi.cuidapetproyect.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
@@ -10,10 +11,12 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
     @Bean
+    @Order(2)
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(auth -> auth
-                .requestMatchers("/login", "/register", "/css/**", "/error").permitAll()
-                // Las vistas MVC y la API REST comparten las mismas reglas de autorización.
+                .requestMatchers("/login", "/register", "/css/**", "/error",
+                        "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                // MVC y rutas heredadas; /api/v1/** tiene su propia cadena JWT.
                 .requestMatchers("/users", "/users/**", "/usuarios", "/usuarios/**")
                     .hasAuthority("MANAGE_USERS")
                 .requestMatchers("/roles", "/roles/**", "/permisos", "/permisos/**",

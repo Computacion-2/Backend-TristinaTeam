@@ -11,6 +11,10 @@ El módulo permite registrarse, iniciar y cerrar sesión, gestionar usuarios, ro
 El taller REST continúa en la [guía Backend](docs/TALLER_BACKEND.md), que contiene
 el alcance de las 23 entidades, el reparto entre los tres integrantes y el avance actual.
 
+La [guía JWT](docs/API_JWT.md) explica los endpoints de autenticación, Swagger y
+Postman. Para ejecutar la aplicación se requiere también la variable `JWT_SECRET`;
+la guía muestra cómo generar una clave local.
+
 - Java 21.
 - Spring Boot 4.1.1.
 - Spring Data JPA y Hibernate.
