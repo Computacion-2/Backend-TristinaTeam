@@ -8,12 +8,16 @@ El módulo permite registrarse, iniciar y cerrar sesión, gestionar usuarios, ro
 
 ## 1. Tecnologías utilizadas
 
+El taller REST continúa en la [guía Backend](docs/TALLER_BACKEND.md), que contiene
+el alcance de las 23 entidades, el reparto entre los tres integrantes y el avance actual.
+
 - Java 21.
 - Spring Boot 4.1.1.
 - Spring Data JPA y Hibernate.
 - Spring Security, BCrypt y Thymeleaf.
 - Oracle Database XE 21c.
 - Maven.
+- MapStruct para transformar DTOs y entidades del nuevo módulo REST.
 - JUnit, Mockito y MockMvc.
 - JaCoCo para la cobertura de pruebas.
 
