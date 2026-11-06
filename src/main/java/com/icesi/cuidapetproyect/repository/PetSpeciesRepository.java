@@ -5,5 +5,9 @@ import java.util.Optional;
 
 public interface PetSpeciesRepository extends JpaRepository<PetSpecies, Long> {
 
+    boolean existsBySpeciesNameIgnoreCase(String speciesName);
+
+    boolean existsBySpeciesNameIgnoreCaseAndIdNot(String speciesName, Long id);
+
     Optional<PetSpecies> findBySpeciesName(String speciesName);
 }

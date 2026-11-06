@@ -54,7 +54,8 @@ Las pruebas y documentación se hacen con cada bloque, no se dejan para el últi
 ### Inventario y rutas propuestas
 
 Las cinco rutas de Juan Pablo están implementadas desde su tercer commit.
-Las 18 rutas de Valentina y Gordillo son el acuerdo para los siguientes bloques.
+Las rutas user-profiles, pet-species y pets están implementadas en el primer
+bloque de Valentina. Las otras 15 rutas corresponden a los siguientes bloques.
 Las rutas existentes del MVC se conservan.
 
 | Entidad | Responsable | Colección REST propuesta |
@@ -173,7 +174,19 @@ Quedan las 18 entidades de Valentina/Gordillo, completar la colección global,
 comprobar el despliegue y grabar los videos. Tener tres commits no equivale por sí
 solo a un porcentaje exacto de la rúbrica.
 
-## Verificación de los bloques
+## Primer commit de Valentina
+
+Implementa UserProfile, PetSpecies y Pet: 15 operaciones, DTOs, MapStruct,
+validaciones, control de acceso por propietario/ADMIN, pruebas integradas,
+Swagger y ampliación de Postman a 69 peticiones. Consultar [VALENTINA_1.md](VALENTINA_1.md).
+Quedan seis entidades de Valentina y nueve de Gordillo, además de finalizar
+la entrega conjunta, el despliegue y los videos.
+
+## Verificación de los bloques completados
+
+Primer bloque de Valentina, 6 de noviembre de 2026: `mvn -o verify` pasó con
+260 pruebas, sin fallos, errores ni omisiones. Se generó el WAR. Las 10 pruebas
+nuevas verifican los CRUD, propiedad de recursos, validaciones y Swagger.
 
 Tercer bloque, 6 de noviembre de 2026: `mvn -o verify` pasó con 250 pruebas,
 sin fallos, errores ni omisiones, y generó el WAR. Las nueve pruebas nuevas

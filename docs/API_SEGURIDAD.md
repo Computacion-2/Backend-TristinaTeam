@@ -117,8 +117,9 @@ Las reglas anteriores se reutilizan al eliminar o sustituir asociaciones.
 Swagger: /swagger-ui/index.html. Documenta las 25 operaciones nuevas y las dos
 de autenticación, con Bearer como esquema de seguridad.
 
-La colección docs/postman/CuidaPet.postman_collection.json tiene 44 peticiones
-en siete carpetas. Importar también el entorno local y configurar baseUrl, email
+El bloque original de seguridad aporta 44 peticiones a la colección
+docs/postman/CuidaPet.postman_collection.json, ampliada por los siguientes bloques.
+Importar también el entorno local y configurar baseUrl, email
 y password. Se necesita una cuenta ACTIVE con MANAGE_USERS y MANAGE_ROLES,
 y el rol OWNER activo con permisos. No usar una cuenta OWNER para ejecutar los CRUD
 administrativos: recibiría 403.

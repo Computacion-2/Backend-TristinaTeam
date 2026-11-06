@@ -18,6 +18,9 @@ la guía muestra cómo generar una clave local.
 El [CRUD REST de seguridad](docs/API_SEGURIDAD.md) cubre usuarios, roles, permisos
 y sus asociaciones: 25 operaciones con DTOs, JWT, Swagger y Postman.
 
+El [primer bloque de Valentina](docs/VALENTINA_1.md) agrega perfiles de usuario,
+especies y mascotas: 15 operaciones adicionales con control de acceso por propietario.
+
 - Java 21.
 - Spring Boot 4.1.1.
 - Spring Data JPA y Hibernate.

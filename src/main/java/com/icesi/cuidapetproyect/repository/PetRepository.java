@@ -5,6 +5,8 @@ import java.util.List;
 
 public interface PetRepository extends JpaRepository<Pet, Long> {
 
+    boolean existsBySpecies_Id(Long speciesId);
+
     List<Pet> findByOwner_Id(Long ownerId);
 
     List<Pet> findBySpecies_Id(Long speciesId);
