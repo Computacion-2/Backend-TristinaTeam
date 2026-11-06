@@ -113,12 +113,13 @@ Swagger muestra las 15 operaciones nuevas en /swagger-ui/index.html.
 Importar la colección y el entorno de docs/postman. Para ejecutar todo se necesita
 una cuenta ACTIVE con rol ADMIN y permisos MANAGE_USERS/MANAGE_ROLES.
 
-La colección completa suma 69 peticiones:
+Al cerrar este primer bloque, la colección sumaba 69 peticiones. El
+[segundo bloque](VALENTINA_2.md) la amplía a 97. El recorrido del primer bloque es:
 1. Los bloques de Juan Pablo crean permisos, roles y un usuario de prueba.
 2. Las carpetas 07, 08 y 09 crean y editan perfil, especie y mascota.
 3. El login del propietario guarda ownerToken por separado de token (administrador).
 4. Se verifica el filtrado por propietario y que OWNER reciba 403 al crear especies.
-5. La carpeta 10 elimina primero mascota, perfil y especie; luego limpia los recursos
+5. La carpeta final de limpieza elimina mascota, perfil y especie; luego limpia los recursos
    del bloque anterior. El usuario queda DELETED según la regla del módulo de usuarios.
 
 Los IDs se guardan automáticamente y cada ejecución usa nombres/correo distintos.

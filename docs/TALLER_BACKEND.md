@@ -55,7 +55,8 @@ Las pruebas y documentación se hacen con cada bloque, no se dejan para el últi
 
 Las cinco rutas de Juan Pablo están implementadas desde su tercer commit.
 Las rutas user-profiles, pet-species y pets están implementadas en el primer
-bloque de Valentina. Las otras 15 rutas corresponden a los siguientes bloques.
+bloque de Valentina. Su segundo bloque implementa pet-photos, service-types y
+caregiver-profiles. Las otras 12 rutas corresponden a los siguientes bloques.
 Las rutas existentes del MVC se conservan.
 
 | Entidad | Responsable | Colección REST propuesta |
@@ -182,7 +183,20 @@ Swagger y ampliación de Postman a 69 peticiones. Consultar [VALENTINA_1.md](VAL
 Quedan seis entidades de Valentina y nueve de Gordillo, además de finalizar
 la entrega conjunta, el despliegue y los videos.
 
+## Segundo commit de Valentina
+
+Implementa PetPhoto, ServiceType y CaregiverProfile: 15 operaciones adicionales,
+DTOs, MapStruct, permisos por propietario/ADMIN, validación del rol CAREGIVER,
+elección de foto principal y controles de relaciones. Amplía Postman a
+97 peticiones. Consultar [VALENTINA_2.md](VALENTINA_2.md).
+Quedan tres entidades de Valentina y nueve de Gordillo.
+
 ## Verificación de los bloques completados
+
+Segundo bloque de Valentina, 6 de noviembre de 2026: `mvn -o verify` pasó
+con 271 pruebas, sin fallos, errores ni omisiones, y generó el WAR.
+Las 11 pruebas nuevas cubren los tres CRUD, foto principal, privacidad,
+roles, conflictos de relaciones y Swagger.
 
 Primer bloque de Valentina, 6 de noviembre de 2026: `mvn -o verify` pasó con
 260 pruebas, sin fallos, errores ni omisiones. Se generó el WAR. Las 10 pruebas

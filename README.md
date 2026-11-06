@@ -21,6 +21,9 @@ y sus asociaciones: 25 operaciones con DTOs, JWT, Swagger y Postman.
 El [primer bloque de Valentina](docs/VALENTINA_1.md) agrega perfiles de usuario,
 especies y mascotas: 15 operaciones adicionales con control de acceso por propietario.
 
+El [segundo bloque de Valentina](docs/VALENTINA_2.md) agrega otras 15 operaciones
+para fotos de mascotas, tipos de servicio y perfiles de cuidadores.
+
 - Java 21.
 - Spring Boot 4.1.1.
 - Spring Data JPA y Hibernate.

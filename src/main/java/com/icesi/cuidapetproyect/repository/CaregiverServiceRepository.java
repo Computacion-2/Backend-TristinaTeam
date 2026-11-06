@@ -6,6 +6,8 @@ import java.util.List;
 
 public interface CaregiverServiceRepository extends JpaRepository<CaregiverService, CaregiverServiceId> {
 
+    boolean existsByServiceType_Id(Long serviceTypeId);
+
     List<CaregiverService> findByCaregiver_Id(Long caregiverId);
 
     List<CaregiverService> findByServiceType_Id(Long serviceTypeId);

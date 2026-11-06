@@ -5,5 +5,9 @@ import java.util.Optional;
 
 public interface ServiceTypeRepository extends JpaRepository<ServiceType, Long> {
 
+    boolean existsByServiceNameIgnoreCase(String serviceName);
+
+    boolean existsByServiceNameIgnoreCaseAndIdNot(String serviceName, Long id);
+
     Optional<ServiceType> findByServiceName(String serviceName);
 }

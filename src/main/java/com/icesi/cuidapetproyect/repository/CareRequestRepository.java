@@ -6,5 +6,7 @@ import java.util.List;
 public interface CareRequestRepository
         extends JpaRepository<CareRequest, Long> {
 
+    boolean existsByServiceType_Id(Long serviceTypeId);
+
     List<CareRequest> findByOwner_Id(Long ownerId);
 }
