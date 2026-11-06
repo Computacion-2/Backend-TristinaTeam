@@ -1,5 +1,6 @@
 package com.icesi.cuidapetproyect.service;
 import com.icesi.cuidapetproyect.model.*;
+import com.icesi.cuidapetproyect.exception.*;
 import com.icesi.cuidapetproyect.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -32,7 +33,7 @@ public class AppRoleService {
     public AppRole findById(Long id) {
         return roleRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException("Rol no encontrado"));
+                        new ResourceNotFoundException("Rol no encontrado"));
     }
 
     // Consultar los permisos asignados a un rol
@@ -50,7 +51,7 @@ public class AppRoleService {
 
         // No permitir roles sin permisos
         if (permissionIds == null || permissionIds.isEmpty()) {
-            throw new RuntimeException(
+            throw new ConflictException(
                     "El rol debe tener al menos un permiso");
         }
 
@@ -58,7 +59,7 @@ public class AppRoleService {
 
         // Evitar nombres duplicados
         if (roleRepository.existsByRoleName(name)) {
-            throw new RuntimeException(
+            throw new ConflictException(
                     "Ya existe un rol con ese nombre");
         }
 
@@ -67,7 +68,7 @@ public class AppRoleService {
                 .distinct()
                 .map(id -> permissionRepository.findById(id)
                         .orElseThrow(() ->
-                                new RuntimeException(
+                                new ResourceNotFoundException(
                                         "Permiso no encontrado: " + id)))
                 .toList();
 
@@ -103,14 +104,14 @@ public class AppRoleService {
         // Los roles del sistema conservan su nombre y permanecen activos
         if (isSystemRole(role)
                 && (!role.getRoleName().equals(name) || !"Y".equals(activeFlag))) {
-            throw new RuntimeException(
+            throw new ConflictException(
                     "El rol " + role.getRoleName() + " no se puede renombrar ni desactivar");
         }
 
         // Comprobar que el nombre no esté repetido
         if (!role.getRoleName().equals(name)
                 && roleRepository.existsByRoleName(name)) {
-            throw new RuntimeException(
+            throw new ConflictException(
                     "Ya existe un rol con ese nombre");
         }
 
@@ -130,14 +131,14 @@ public class AppRoleService {
         AppPermission permission = permissionRepository
                 .findById(permissionId)
                 .orElseThrow(() ->
-                        new RuntimeException("Permiso no encontrado"));
+                        new ResourceNotFoundException("Permiso no encontrado"));
 
         RolePermissionId id =
                 new RolePermissionId(roleId, permissionId);
 
         // Evitar permisos duplicados
         if (rolePermissionRepository.existsById(id)) {
-            throw new RuntimeException(
+            throw new ConflictException(
                     "El rol ya tiene este permiso");
         }
 
@@ -163,13 +164,13 @@ public class AppRoleService {
 
         // Comprobar que el rol tenga el permiso
         if (!rolePermissionRepository.existsById(id)) {
-            throw new RuntimeException(
+            throw new ResourceNotFoundException(
                     "El rol no tiene este permiso");
         }
 
         // No permitir que el rol se quede sin permisos
         if (permissions.size() <= 1) {
-            throw new RuntimeException(
+            throw new ConflictException(
                     "No se puede dejar el rol sin permisos");
         }
 
@@ -180,7 +181,7 @@ public class AppRoleService {
                 .anyMatch(permission -> permissionId.equals(permission.getId())
                         && AppPermissionService.SYSTEM_PERMISSIONS
                         .contains(permission.getPermissionCode()))) {
-            throw new RuntimeException(
+            throw new ConflictException(
                     "El rol ADMIN debe conservar los permisos de administración");
         }
 
@@ -194,13 +195,13 @@ public class AppRoleService {
         AppRole role = findById(id);
 
         if (isSystemRole(role)) {
-            throw new RuntimeException(
+            throw new ConflictException(
                     "No se puede eliminar el rol " + role.getRoleName());
         }
 
         // Impedir eliminar un rol asignado a usuarios
         if (!userRoleRepository.findByRole_Id(id).isEmpty()) {
-            throw new RuntimeException(
+            throw new ConflictException(
                     "No se puede eliminar un rol asignado a usuarios");
         }
 

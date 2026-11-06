@@ -72,10 +72,10 @@ $clavePruebas.Dispose()
 El esquema de pruebas debe existir y estar preparado. Para verificar solamente los servicios y controladores sin Oracle:
 
 ```powershell
-.\mvnw.cmd test '-Dtest=*Test,!ApiAuthenticationTest'
+.\mvnw.cmd test '-Dtest=*Test,!ApiAuthenticationTest,!ApiCrudIntegrationTest'
 ```
 
-Esta selección excluye CuidaPetProyectApplicationTests y ApiAuthenticationTest, que requieren Oracle. No usarla como sustituto de clean verify para la entrega final.
+Esta selección excluye CuidaPetProyectApplicationTests, ApiAuthenticationTest y ApiCrudIntegrationTest, que requieren Oracle. No usarla como sustituto de clean verify para la entrega final.
 
 ## Ejecutar el WAR localmente
 

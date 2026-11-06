@@ -53,7 +53,8 @@ Las pruebas y documentación se hacen con cada bloque, no se dejan para el últi
 
 ### Inventario y rutas propuestas
 
-Estas rutas son un acuerdo para los próximos commits; **todavía no están implementadas**.
+Las cinco rutas de Juan Pablo están implementadas desde su tercer commit.
+Las 18 rutas de Valentina y Gordillo son el acuerdo para los siguientes bloques.
 Las rutas existentes del MVC se conservan.
 
 | Entidad | Responsable | Colección REST propuesta |
@@ -158,7 +159,25 @@ El tercer commit agregará los CRUD de las cinco entidades de seguridad; las otr
 18 entidades siguen asignadas a Valentina y Gordillo. Swagger y Postman se ampliarán
 con cada bloque. El despliegue y los videos siguen pendientes.
 
-## Verificación
+## Qué incluye el tercer commit de Juan Pablo
+
+- Los cinco CRUD de seguridad: 25 operaciones REST con DTOs y MapStruct.
+- Asociaciones con claves compuestas, auditoría del usuario autenticado y
+  sustitución transaccional que conserva los mínimos de roles/permisos.
+- Errores tipados 404/409, validación 400 y seguridad JWT 401/403.
+- Swagger de todas las operaciones y colección Postman de 44 peticiones.
+- Pruebas integradas sobre Oracle, con reversión/limpieza de datos de prueba.
+
+La [guía del CRUD de seguridad](API_SEGURIDAD.md) explica contratos y ejecución.
+Quedan las 18 entidades de Valentina/Gordillo, completar la colección global,
+comprobar el despliegue y grabar los videos. Tener tres commits no equivale por sí
+solo a un porcentaje exacto de la rúbrica.
+
+## Verificación de los bloques
+
+Tercer bloque, 6 de noviembre de 2026: `mvn -o verify` pasó con 250 pruebas,
+sin fallos, errores ni omisiones, y generó el WAR. Las nueve pruebas nuevas
+cubren los CRUD, errores, permisos, Swagger y la reversión de asociaciones.
 
 Resultado del primer bloque, 5 de noviembre de 2026: `mvn -o verify` terminó con
 BUILD SUCCESS, 225 pruebas ejecutadas, cero fallos, cero errores y cero omitidas

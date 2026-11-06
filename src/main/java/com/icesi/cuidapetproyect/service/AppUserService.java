@@ -1,5 +1,6 @@
 package com.icesi.cuidapetproyect.service;
 import com.icesi.cuidapetproyect.model.*;
+import com.icesi.cuidapetproyect.exception.*;
 import com.icesi.cuidapetproyect.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,7 +28,7 @@ public class AppUserService {
     public AppUser findById(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException("Usuario no encontrado"));
+                        new ResourceNotFoundException("Usuario no encontrado"));
     }
 
     // Crear un usuario con sus roles
@@ -36,13 +37,13 @@ public class AppUserService {
 
         // Un usuario debe tener al menos un rol
         if (roleIds == null || roleIds.isEmpty()) {
-            throw new RuntimeException(
+            throw new ConflictException(
                     "El usuario debe tener al menos un rol");
         }
 
         // No permitir correos duplicados
         if (userRepository.existsByEmail(user.getEmail())) {
-            throw new IllegalArgumentException(
+            throw new ConflictException(
                     "El correo ya está registrado");
         }
 
@@ -51,7 +52,7 @@ public class AppUserService {
                 .distinct()
                 .map(id -> roleRepository.findById(id)
                         .orElseThrow(() ->
-                                new RuntimeException(
+                                new ResourceNotFoundException(
                                         "Rol no encontrado: " + id)))
                 .toList();
 
@@ -59,7 +60,7 @@ public class AppUserService {
         for (AppRole role : roles) {
             if (rolePermissionRepository
                     .findByRole_Id(role.getId()).isEmpty()) {
-                throw new RuntimeException(
+                throw new ConflictException(
                         "El rol no tiene permisos: "
                                 + role.getRoleName());
             }
@@ -92,7 +93,7 @@ public class AppUserService {
         // Comprobar que el correo no pertenece a otro usuario
         if (!user.getEmail().equals(data.getEmail())
                 && userRepository.existsByEmail(data.getEmail())) {
-            throw new RuntimeException(
+            throw new ConflictException(
                     "El correo ya está registrado");
         }
 
@@ -131,12 +132,12 @@ public class AppUserService {
 
         AppRole role = roleRepository.findById(roleId)
                 .orElseThrow(() ->
-                        new RuntimeException("Rol no encontrado"));
+                        new ResourceNotFoundException("Rol no encontrado"));
 
         // No asignar roles sin permisos
         if (rolePermissionRepository
                 .findByRole_Id(roleId).isEmpty()) {
-            throw new RuntimeException(
+            throw new ConflictException(
                     "No se puede asignar un rol sin permisos");
         }
 
@@ -144,7 +145,7 @@ public class AppUserService {
 
         // Evitar asignaciones duplicadas
         if (userRoleRepository.existsById(id)) {
-            throw new RuntimeException(
+            throw new ConflictException(
                     "El usuario ya tiene este rol");
         }
 
@@ -165,7 +166,7 @@ public class AppUserService {
 
         // Verificar que el usuario tenga ese rol
         if (!userRoleRepository.existsById(id)) {
-            throw new RuntimeException(
+            throw new ResourceNotFoundException(
                     "El usuario no tiene este rol");
         }
 
@@ -174,7 +175,7 @@ public class AppUserService {
 
         // Impedir que se quede sin roles
         if (roles.size() <= 1) {
-            throw new RuntimeException(
+            throw new ConflictException(
                     "No se puede dejar al usuario sin roles");
         }
 
@@ -191,7 +192,7 @@ public class AppUserService {
 
         // Evitar eliminarlo dos veces
         if ("DELETED".equals(user.getAccountStatus())) {
-            throw new RuntimeException(
+            throw new ConflictException(
                     "El usuario ya está eliminado");
         }
 

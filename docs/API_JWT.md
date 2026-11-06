@@ -1,8 +1,8 @@
 # API JWT: ejecución y pruebas
 
 Este bloque corresponde al segundo commit de Juan Pablo. Agrega autenticación JWT,
-dos cadenas de seguridad, Swagger y la colección inicial de Postman. El CRUD de
-usuarios, roles, permisos y asociaciones corresponde a su tercer commit.
+dos cadenas de seguridad, Swagger y la colección inicial de Postman. El tercer
+commit agrega el [CRUD de usuarios, roles, permisos y asociaciones](API_SEGURIDAD.md).
 
 ## Configurar y ejecutar
 
@@ -72,7 +72,7 @@ Una cookie de sesión MVC no autentica la API y un token JWT no inicia sesión M
 Las próximas rutas /api/v1/users y /api/v1/user-roles exigen MANAGE_USERS;
 roles, permissions y role-permissions exigen MANAGE_ROLES.
 Otros endpoints requieren autenticación y deberán agregar sus reglas de propiedad
-y negocio al implementarse. Los controladores CRUD aún no existen bajo /api/v1.
+y negocio al implementarse. Los cinco controladores de seguridad ya existen bajo /api/v1.
 Las rutas REST heredadas siguen funcionando con las reglas MVC durante esta etapa.
 
 ## Swagger
@@ -93,11 +93,12 @@ Configurar localmente:
 - email y password: credenciales de una cuenta existente.
 - token: lo asigna automáticamente el script del login.
 
-Ejecutar la colección completa en orden: sin token, token inválido, datos inválidos,
-login y consulta del usuario actual. El login limpia cualquier token anterior.
+Ejecutar la colección completa en orden: autenticación, permisos, roles, usuarios,
+asociaciones y limpieza. El login limpia cualquier token anterior.
 Los JSON versionados no contienen credenciales ni tokens reales.
-Cada integrante añadirá sus carpetas CRUD y pruebas al desarrollar su bloque.
-Esta colección todavía no cubre las 23 entidades.
+El tercer commit amplía la colección a 44 peticiones para las cinco entidades de
+seguridad; requiere una cuenta con MANAGE_USERS y MANAGE_ROLES. Cada integrante
+añadirá sus carpetas CRUD al desarrollar su bloque. Todavía no cubre las 23 entidades.
 
 ## Pruebas automatizadas
 

@@ -15,6 +15,9 @@ La [guía JWT](docs/API_JWT.md) explica los endpoints de autenticación, Swagger
 Postman. Para ejecutar la aplicación se requiere también la variable `JWT_SECRET`;
 la guía muestra cómo generar una clave local.
 
+El [CRUD REST de seguridad](docs/API_SEGURIDAD.md) cubre usuarios, roles, permisos
+y sus asociaciones: 25 operaciones con DTOs, JWT, Swagger y Postman.
+
 - Java 21.
 - Spring Boot 4.1.1.
 - Spring Data JPA y Hibernate.

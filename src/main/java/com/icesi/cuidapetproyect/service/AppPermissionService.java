@@ -1,5 +1,6 @@
 package com.icesi.cuidapetproyect.service;
 import com.icesi.cuidapetproyect.model.*;
+import com.icesi.cuidapetproyect.exception.*;
 import com.icesi.cuidapetproyect.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,7 +30,7 @@ public class AppPermissionService {
     public AppPermission findById(Long id) {
         return permissionRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException("Permiso no encontrado"));
+                        new ResourceNotFoundException("Permiso no encontrado"));
     }
 
     // Crear un permiso
@@ -41,13 +42,13 @@ public class AppPermissionService {
 
         // El código es la autoridad que recibe Spring Security y debe ser único
         if (permissionRepository.existsByPermissionCode(code)) {
-            throw new RuntimeException(
+            throw new ConflictException(
                     "Ya existe un permiso con ese código");
         }
 
         // No permitir nombres duplicados
         if (permissionRepository.existsByPermissionNameIgnoreCase(name)) {
-            throw new RuntimeException(
+            throw new ConflictException(
                     "Ya existe un permiso con ese nombre");
         }
 
@@ -67,7 +68,7 @@ public class AppPermissionService {
 
         // Comprobar si el nuevo nombre ya pertenece a otro permiso
         if (permissionRepository.existsByPermissionNameIgnoreCaseAndIdNot(name, id)) {
-            throw new RuntimeException(
+            throw new ConflictException(
                     "Ya existe otro permiso con ese nombre");
         }
 
@@ -84,7 +85,7 @@ public class AppPermissionService {
         AppPermission permission = findById(id);
 
         if (SYSTEM_PERMISSIONS.contains(permission.getPermissionCode())) {
-            throw new RuntimeException(
+            throw new ConflictException(
                     "No se puede eliminar un permiso requerido por el sistema");
         }
 
@@ -98,7 +99,7 @@ public class AppPermissionService {
             Long roleId = assignment.getRole().getId();
 
             if (rolePermissionRepository.findByRole_Id(roleId).size() <= 1) {
-                throw new RuntimeException(
+                throw new ConflictException(
                         "No se puede eliminar el último permiso de un rol");
             }
         }
