@@ -6,7 +6,7 @@ Integrantes: Juan Pablo Pino, Valentina Martínez y Juan Gordillo.
 
 El módulo permite registrarse, iniciar y cerrar sesión, gestionar usuarios, roles y permisos, asignar roles a usuarios y asociar permisos a roles. La [guía MVC](docs/TALLER_MVC.md) explica su funcionamiento y el recorrido para demostrarlo.
 
-## 1. Tecnologías utilizadas
+## Taller REST con JWT
 
 El taller REST continúa en la [guía Backend](docs/TALLER_BACKEND.md), que contiene
 el alcance de las 23 entidades, el reparto entre los tres integrantes y el avance actual.
@@ -33,6 +33,12 @@ Las pruebas también se pueden ejecutar sin Oracle con el perfil Maven `h2`.
 
 El [segundo bloque de Gordillo](docs/GORDILLO_2.md) agrega reservas con su máquina de
 estados, novedades del cuidado y fotos de esas novedades: otras 15 operaciones REST.
+
+El [tercer bloque de Gordillo](docs/GORDILLO_3.md) completa notificaciones, reportes
+de incidentes y reseñas. Con él, las 23 entidades tienen CRUD REST (115 operaciones);
+la guía también resume la verificación conjunta y la ejecución de Postman.
+
+## 1. Tecnologías utilizadas
 
 - Java 21.
 - Spring Boot 4.1.1.
@@ -113,6 +119,12 @@ El reporte de JaCoCo se genera en:
 
 Las pruebas cubren los servicios de usuarios, roles, permisos, registro y carga de credenciales, además de reglas de acceso y formularios MVC. Consultar el reporte generado para ver la cobertura actual. La prueba contextLoads requiere la base Oracle configurada.
 
+Para ejecutar todas las pruebas sin Oracle, el perfil Maven `h2` usa una base en memoria en modo Oracle que Hibernate crea en cada ejecución:
+
+```powershell
+.\mvnw.cmd -Ph2 clean verify
+```
+
 ## 7. Funcionalidades implementadas
 
 El módulo se usa desde vistas Thymeleaf. `/login`, `/register`, `/css/**` y `/error` son públicos; las demás rutas exigen sesión; la gestión de usuarios exige `MANAGE_USERS` y la de roles y permisos exige `MANAGE_ROLES`. El registro asigna OWNER y guarda una contraseña BCrypt. Solo las cuentas ACTIVE pueden iniciar sesión y los roles inactivos no conceden autoridades.
@@ -158,8 +170,8 @@ El archivo desplegable es `target/cuidapet.war`. La carpeta `target/` no se vers
 # Suite completa y WAR; contextLoads necesita Oracle y DB_PASSWORD
 ./mvnw clean verify
 
-# WAR sin la prueba que se conecta a Oracle (212 pruebas)
-./mvnw clean package '-Dtest=!CuidaPetProyectApplicationTests'
+# Suite completa y WAR sin Oracle (base H2 en memoria)
+./mvnw -Ph2 clean verify
 ```
 
 En Windows con PowerShell se usa `.\mvnw.cmd` en lugar de `./mvnw`.
@@ -174,6 +186,7 @@ Para desplegarlo en un Tomcat externo, el proceso de Tomcat debe definir estas v
 | `DB_URL` | URL JDBC del Oracle accesible desde el servidor, por ejemplo `jdbc:oracle:thin:@<host>:1521/<servicio>` |
 | `DB_USER` | Usuario dueño del esquema creado con los scripts de `src/main/resources/sql` |
 | `DB_PASSWORD` | Contraseña de ese usuario (no se guarda en el repositorio) |
+| `JWT_SECRET` | Clave Base64 de al menos 32 bytes para firmar los tokens de la API REST |
 
 El esquema debe existir antes del despliegue (`01_creacion.sql` y `02_datos_iniciales.sql`), porque la aplicación usa `ddl-auto=validate`. Para administrar el módulo, registrar una cuenta en `/cuidapet/register` y asignarle el rol ADMIN como se indica en [la guía MVC](docs/TALLER_MVC.md).
 

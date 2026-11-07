@@ -60,7 +60,7 @@ En la misma terminal con Oracle configurado y el esquema preparado:
 .\mvnw.cmd clean verify
 ```
 
-El resultado es `target/cuidapet.war`; el informe de cobertura queda en `target/site/jacoco/index.html`. Las pruebas unitarias utilizan dobles de prueba; contextLoads y ApiAuthenticationTest abren una conexión a Oracle para validar el esquema. Las pruebas de arranque usan una clave JWT exclusiva de pruebas. Para ejecutar contra el esquema de pruebas, definir TEST_DB_URL y TEST_DB_USER y solicitar su contraseña:
+El resultado es `target/cuidapet.war`; el informe de cobertura queda en `target/site/jacoco/index.html`. Las pruebas unitarias utilizan dobles de prueba; contextLoads y ApiAuthenticationTest abren una conexión a Oracle para validar el esquema. Las pruebas de arranque usan una clave JWT exclusiva de pruebas. Sin Oracle, `.\mvnw.cmd -Ph2 clean verify` ejecuta la misma suite sobre una base H2 en memoria en modo Oracle. Para ejecutar contra el esquema de pruebas, definir TEST_DB_URL y TEST_DB_USER y solicitar su contraseña:
 
 ```powershell
 $clavePruebas = Read-Host 'Contraseña de Oracle de pruebas' -AsSecureString

@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "CuidaPet Backend",
-    "description": "Bloques completados: Juan Pablo y Valentina 1/2. Ejecutar toda la colección con una cuenta ACTIVE, rol ADMIN y permisos MANAGE_USERS/MANAGE_ROLES. Requiere OWNER y CAREGIVER activos con permisos. Crea datos únicos; limpieza al final; el usuario de prueba queda DELETED.\nTercer bloque de Valentina: disponibilidad, servicios ofrecidos y favoritos; ejecutar en orden hasta la limpieza final.\nGordillo, bloque 1: estados de reserva, solicitudes y postulaciones. El segundo cuidador inicia sesión con la contraseña generada para la ejecución.\nGordillo, bloque 2: reservas, transiciones de estado, novedades, fotos y cancelación.",
+    "description": "Bloques completados: Juan Pablo y Valentina 1/2. Ejecutar toda la colección con una cuenta ACTIVE, rol ADMIN y permisos MANAGE_USERS/MANAGE_ROLES. Requiere OWNER y CAREGIVER activos con permisos. Crea datos únicos; limpieza al final; el usuario de prueba queda DELETED.\nTercer bloque de Valentina: disponibilidad, servicios ofrecidos y favoritos; ejecutar en orden hasta la limpieza final.\nGordillo, bloque 1: estados de reserva, solicitudes y postulaciones. El segundo cuidador inicia sesión con la contraseña generada para la ejecución.\nGordillo, bloque 2: reservas, transiciones de estado, novedades, fotos y cancelación.\nGordillo, bloque 3: notificaciones manuales y automáticas, reportes de incidentes y reseñas. La colección cubre las 23 entidades; ejecutarla completa y en orden.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -41,7 +41,8 @@
                   "[\"availabilityId\",\"secondCaregiverId\"].forEach(key=>pm.environment.unset(key));",
                   "pm.environment.unset(\"thirdCaregiverId\");",
                   "[\"cancelledStatusName\",\"scheduledStatusName\",\"careStart\",\"careEnd\",\"careRequestId\",\"secondCareRequestId\",\"caregiverToken\",\"careApplicationId\",\"rejectedApplicationId\"].forEach(key => pm.environment.unset(key));",
-                  "[\"careBookingId\",\"careUpdateId\",\"secondCareUpdateId\",\"careUpdatePhotoId\",\"secondCareUpdatePhotoId\",\"thirdCareRequestId\",\"thirdApplicationId\",\"cancelledBookingId\"].forEach(key => pm.environment.unset(key));"
+                  "[\"careBookingId\",\"careUpdateId\",\"secondCareUpdateId\",\"careUpdatePhotoId\",\"secondCareUpdatePhotoId\",\"thirdCareRequestId\",\"thirdApplicationId\",\"cancelledBookingId\"].forEach(key => pm.environment.unset(key));",
+                  "[\"notificationId\",\"incidentReportId\",\"secondIncidentReportId\",\"reviewId\",\"secondReviewId\"].forEach(key => pm.environment.unset(key));"
                 ]
               }
             },
@@ -6715,8 +6716,1649 @@
       ]
     },
     {
-      "name": "22 - Limpieza de los bloques completados",
+      "name": "22 - Gordillo: notificaciones",
       "item": [
+        {
+          "name": "Notificaciones automáticas del cuidador",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/notifications",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{caregiverToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const types = pm.response.json().map(n => n.notificationType);",
+                  "pm.test(\"Aviso de reserva\", () => pm.expect(types).to.include(\"BOOKING_CREATED\"));",
+                  "pm.test(\"Solo propias\", () => pm.response.json().forEach(n => pm.expect(n.userId).to.eql(Number(pm.environment.get(\"secondCaregiverId\")))));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Notificaciones automáticas del propietario",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/notifications",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const types = pm.response.json().map(n => n.notificationType);",
+                  "pm.test(\"Novedades y cambios de estado\", () => { pm.expect(types).to.include(\"CARE_UPDATE\"); pm.expect(types).to.include(\"BOOKING_STATUS\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "ADMIN envía una notificación",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/notifications",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"userId\":{{createdUserId}},\"notificationType\":\"BOOKING_REMINDER\",\"title\":\"Recordatorio\",\"messageText\":\"Revisa tu reserva de mañana\",\"referenceEntity\":\"CARE_BOOKING\",\"referenceId\":{{careBookingId}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "if (pm.response.code === 201) pm.environment.set(\"notificationId\", pm.response.json().id);",
+                  "pm.test(\"readFlag = N\", () => pm.expect(pm.response.json().readFlag).to.eql(\"N\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Propietario no envía notificaciones: 403",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/notifications",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"userId\":{{secondCaregiverId}},\"notificationType\":\"BOOKING_REMINDER\",\"title\":\"Recordatorio\",\"messageText\":\"Revisa tu reserva de mañana\",\"referenceEntity\":\"CARE_BOOKING\",\"referenceId\":{{careBookingId}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Tipo inválido: 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/notifications",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"userId\":{{createdUserId}},\"notificationType\":\"aviso libre\",\"title\":\"Recordatorio\",\"messageText\":\"Revisa tu reserva de mañana\",\"referenceEntity\":\"CARE_BOOKING\",\"referenceId\":{{careBookingId}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Destinatario inexistente: 404",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/notifications",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"userId\":999999999,\"notificationType\":\"BOOKING_REMINDER\",\"title\":\"Recordatorio\",\"messageText\":\"Revisa tu reserva de mañana\",\"referenceEntity\":\"CARE_BOOKING\",\"referenceId\":{{careBookingId}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar notificaciones propias",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/notifications",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Incluye la enviada\", () => pm.expect(pm.response.json().map(n => n.id)).to.include(Number(pm.environment.get(\"notificationId\"))));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consultar notificación",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/notifications/{{notificationId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"title = Recordatorio\", () => pm.expect(pm.response.json().title).to.eql(\"Recordatorio\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Notificación ajena: 403",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/notifications/{{notificationId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{caregiverToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Marcar como leída",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/notifications/{{notificationId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"readFlag\":\"Y\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"readFlag = Y\", () => pm.expect(pm.response.json().readFlag).to.eql(\"Y\"));",
+                  "pm.test(\"Fecha de lectura\", () => pm.expect(pm.response.json().readAt).to.be.a(\"string\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "El destinatario no cambia el contenido: 403",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/notifications/{{notificationId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"readFlag\":\"Y\",\"title\":\"Cambiado\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "ADMIN corrige el título",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/notifications/{{notificationId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"readFlag\":\"Y\",\"title\":\"Recordatorio de reserva\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"title = Recordatorio de reserva\", () => pm.expect(pm.response.json().title).to.eql(\"Recordatorio de reserva\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "23 - Gordillo: reportes de incidentes",
+      "item": [
+        {
+          "name": "Reportarse a sí mismo: 409",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/incident-reports",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"reporterId\":{{createdUserId}},\"reportedUserId\":{{createdUserId}},\"requestId\":{{careRequestId}},\"bookingId\":{{careBookingId}},\"reportReason\":\"Llegó tarde\",\"reportDetails\":\"El cuidador llegó una hora tarde\",\"evidenceUrl\":\"https://evidencias.example.com/{{runId}}.jpg\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reportar a quien no participó: 409",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/incident-reports",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"reporterId\":{{createdUserId}},\"reportedUserId\":{{thirdCaregiverId}},\"requestId\":{{careRequestId}},\"bookingId\":{{careBookingId}},\"reportReason\":\"Llegó tarde\",\"reportDetails\":\"El cuidador llegó una hora tarde\",\"evidenceUrl\":\"https://evidencias.example.com/{{runId}}.jpg\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reserva de otra solicitud: 409",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/incident-reports",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"reporterId\":{{createdUserId}},\"reportedUserId\":{{secondCaregiverId}},\"requestId\":{{secondCareRequestId}},\"bookingId\":{{careBookingId}},\"reportReason\":\"Llegó tarde\",\"reportDetails\":\"El cuidador llegó una hora tarde\",\"evidenceUrl\":\"https://evidencias.example.com/{{runId}}.jpg\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reportar a nombre de otro: 403",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/incident-reports",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"reporterId\":{{createdUserId}},\"reportedUserId\":{{secondCaregiverId}},\"requestId\":{{careRequestId}},\"bookingId\":{{careBookingId}},\"reportReason\":\"Llegó tarde\",\"reportDetails\":\"El cuidador llegó una hora tarde\",\"evidenceUrl\":\"https://evidencias.example.com/{{runId}}.jpg\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{caregiverToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "El propietario reporta un incidente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/incident-reports",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"reporterId\":{{createdUserId}},\"reportedUserId\":{{secondCaregiverId}},\"requestId\":{{careRequestId}},\"bookingId\":{{careBookingId}},\"reportReason\":\"Llegó tarde\",\"reportDetails\":\"El cuidador llegó una hora tarde\",\"evidenceUrl\":\"https://evidencias.example.com/{{runId}}.jpg\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "if (pm.response.code === 201) pm.environment.set(\"incidentReportId\", pm.response.json().id);",
+                  "pm.test(\"reportStatus = OPEN\", () => pm.expect(pm.response.json().reportStatus).to.eql(\"OPEN\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar reportes propios",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/incident-reports",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Solo propios\", () => pm.response.json().forEach(r => pm.expect(r.reporterId).to.eql(Number(pm.environment.get(\"createdUserId\")))));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consultar reporte",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/incident-reports/{{incidentReportId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "La persona reportada no lo consulta: 403",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/incident-reports/{{incidentReportId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{caregiverToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ampliar detalles del reporte",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/incident-reports/{{incidentReportId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"reportReason\":\"Llegó tarde\",\"reportDetails\":\"Llegó una hora y media tarde\",\"evidenceUrl\":null,\"reportStatus\":\"OPEN\",\"resolutionNotes\":null}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"reportDetails = Llegó una hora y media tarde\", () => pm.expect(pm.response.json().reportDetails).to.eql(\"Llegó una hora y media tarde\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Quien reporta no lo resuelve: 403",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/incident-reports/{{incidentReportId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"reportReason\":\"Llegó tarde\",\"reportDetails\":\"Llegó una hora y media tarde\",\"evidenceUrl\":null,\"reportStatus\":\"RESOLVED\",\"resolutionNotes\":\"Resuelto\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "ADMIN pasa el reporte a revisión",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/incident-reports/{{incidentReportId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"reportReason\":\"Llegó tarde\",\"reportDetails\":\"Llegó una hora y media tarde\",\"evidenceUrl\":null,\"reportStatus\":\"IN_REVIEW\",\"resolutionNotes\":null}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"reportStatus = IN_REVIEW\", () => pm.expect(pm.response.json().reportStatus).to.eql(\"IN_REVIEW\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Resolver sin notas: 400",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/incident-reports/{{incidentReportId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"reportReason\":\"Llegó tarde\",\"reportDetails\":\"Llegó una hora y media tarde\",\"evidenceUrl\":null,\"reportStatus\":\"RESOLVED\",\"resolutionNotes\":null}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "ADMIN resuelve el reporte",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/incident-reports/{{incidentReportId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"reportReason\":\"Llegó tarde\",\"reportDetails\":\"Llegó una hora y media tarde\",\"evidenceUrl\":null,\"reportStatus\":\"RESOLVED\",\"resolutionNotes\":\"Se habló con ambas partes\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"reportStatus = RESOLVED\", () => pm.expect(pm.response.json().reportStatus).to.eql(\"RESOLVED\"));",
+                  "pm.test(\"Resuelto por ADMIN\", () => pm.expect(pm.response.json().resolvedById).to.be.a(\"number\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reporte resuelto no se retira: 409",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/incident-reports/{{incidentReportId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "El cuidador reporta sin reserva",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/incident-reports",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"reporterId\":{{secondCaregiverId}},\"reportedUserId\":{{createdUserId}},\"requestId\":{{thirdCareRequestId}},\"reportReason\":\"Mensajes ofensivos\",\"reportDetails\":\"Recibí mensajes ofensivos\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{caregiverToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "if (pm.response.code === 201) pm.environment.set(\"secondIncidentReportId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Retirar reporte abierto",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/incident-reports/{{secondIncidentReportId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{caregiverToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reporte retirado: 404",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/incident-reports/{{secondIncidentReportId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "24 - Gordillo: reseñas",
+      "item": [
+        {
+          "name": "Reserva no completada: 409",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/reviews",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"bookingId\":{{cancelledBookingId}},\"reviewerId\":{{createdUserId}},\"rating\":5,\"reviewComment\":\"Bien\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Calificación fuera de rango: 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/reviews",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"bookingId\":{{careBookingId}},\"reviewerId\":{{createdUserId}},\"rating\":6,\"reviewComment\":\"Excelente\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "El propietario reseña al cuidador",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/reviews",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"bookingId\":{{careBookingId}},\"reviewerId\":{{createdUserId}},\"rating\":5,\"reviewComment\":\"Excelente cuidado\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "if (pm.response.code === 201) pm.environment.set(\"reviewId\", pm.response.json().id);",
+                  "pm.test(\"reviewedUserId = Number(pm.environment.get(secondCaregiverId))\", () => pm.expect(pm.response.json().reviewedUserId).to.eql(Number(pm.environment.get(\"secondCaregiverId\"))));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reseña duplicada: 409",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/reviews",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"bookingId\":{{careBookingId}},\"reviewerId\":{{createdUserId}},\"rating\":4,\"reviewComment\":\"Otra\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reseñar a nombre de otro: 403",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/reviews",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"bookingId\":{{careBookingId}},\"reviewerId\":{{createdUserId}},\"rating\":1,\"reviewComment\":\"Suplantación\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{caregiverToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "El cuidador reseña al propietario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/reviews",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"bookingId\":{{careBookingId}},\"reviewerId\":{{secondCaregiverId}},\"rating\":4,\"reviewComment\":\"Mascota tranquila\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{caregiverToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "if (pm.response.code === 201) pm.environment.set(\"secondReviewId\", pm.response.json().id);",
+                  "pm.test(\"reviewedUserId = Number(pm.environment.get(createdUserId))\", () => pm.expect(pm.response.json().reviewedUserId).to.eql(Number(pm.environment.get(\"createdUserId\"))));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar reseñas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/reviews",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{caregiverToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const ids = pm.response.json().map(r => r.id);",
+                  "pm.test(\"Ambas reseñas\", () => { pm.expect(ids).to.include(Number(pm.environment.get(\"reviewId\"))); pm.expect(ids).to.include(Number(pm.environment.get(\"secondReviewId\"))); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consultar reseña",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/reviews/{{reviewId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{caregiverToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"rating = 5\", () => pm.expect(pm.response.json().rating).to.eql(5));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Editar reseña propia",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/reviews/{{reviewId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"rating\":4,\"reviewComment\":\"Muy buen cuidado\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"rating = 4\", () => pm.expect(pm.response.json().rating).to.eql(4));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Solo el autor edita: 403",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/reviews/{{reviewId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"rating\":1}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{caregiverToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "El cuidador recibe la notificación de la reseña",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/notifications",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{caregiverToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Aviso de reseña\", () => pm.expect(pm.response.json().map(n => n.notificationType)).to.include(\"REVIEW_RECEIVED\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "El cuidador elimina su reseña",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/reviews/{{secondReviewId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{caregiverToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reseña eliminada: 404",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/reviews/{{secondReviewId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "25 - Limpieza de los bloques completados",
+      "item": [
+        {
+          "name": "Eliminar reseña",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/reviews/{{reviewId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar reporte resuelto",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/incident-reports/{{incidentReportId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reporte eliminado: 404",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/incident-reports/{{incidentReportId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar notificación",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/notifications/{{notificationId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Notificación eliminada: 404",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/notifications/{{notificationId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
         {
           "name": "Eliminar reserva cancelada",
           "request": {

@@ -9,4 +9,5 @@ public interface UserReviewRepository
     List<UserReview> findByReviewedUser_Id(Long userId);
 
     List<UserReview> findByBooking_Id(Long bookingId);
+    boolean existsByBooking_IdAndReviewer_Id(Long bookingId, Long reviewerId);
 }

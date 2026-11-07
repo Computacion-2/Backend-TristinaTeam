@@ -59,7 +59,8 @@ bloque de Valentina. Su segundo bloque implementa pet-photos, service-types y
 caregiver-profiles. El tercero completa caregiver-availabilities, caregiver-services
 y favorite-caregivers. El primer bloque de Gordillo implementa booking-statuses,
 care-requests y care-applications; el segundo, care-bookings, care-updates y
-care-update-photos.
+care-update-photos; el tercero, notifications, incident-reports y reviews.
+Las 23 entidades tienen sus cinco operaciones REST.
 Las rutas existentes del MVC se conservan.
 
 | Entidad | Responsable | Colección REST propuesta |
@@ -221,7 +222,32 @@ participante, novedades y fotos solo durante el cuidado, notificaciones automát
 y borrado de ADMIN que reabre la solicitud. Postman llega a 235 peticiones.
 Consultar [GORDILLO_2.md](GORDILLO_2.md). Quedan tres entidades de Gordillo.
 
+## Tercer commit de Gordillo
+
+Implementa AppNotification, IncidentReport y UserReview: 15 operaciones, DTOs,
+MapStruct, notificaciones manuales de ADMIN y automáticas del flujo de cuidado,
+reportes entre participantes con revisión y resolución de ADMIN, y reseñas mutuas
+de reservas completadas. Postman llega a 282 peticiones y cubre las 23 entidades.
+Consultar [GORDILLO_3.md](GORDILLO_3.md).
+
+## Estado de la entrega conjunta
+
+| Requisito del enunciado | Estado |
+| --- | --- |
+| Controladores REST de las 23 entidades, DTOs, MapStruct y errores HTTP | Completo: 115 operaciones CRUD y autenticación |
+| JWT, filtro y SecurityFilterChain REST separada del MVC | Completo; el MVC sigue con sesión y CSRF |
+| Postman con variables, scripts y ejecución secuencial | Completo: 282 peticiones, ejecutada completa con Newman |
+| Swagger de todos los métodos | Completo: 115 operaciones documentadas |
+| Pruebas automatizadas | 302 pruebas; con Oracle o con el perfil `h2` |
+| Despliegue en el Tomcat del curso | Pendiente: requiere los datos de Oracle del servidor |
+| Videos de funcionamiento | Pendiente: cada integrante graba su bloque |
+
 ## Verificación de los bloques completados
+
+Tercer bloque de Gordillo y verificación conjunta, 7 de noviembre de 2026:
+`mvn -o -Ph2 verify` pasó con 302 pruebas, sin fallos, errores ni omisiones, y generó
+el WAR. Newman ejecutó la colección completa dos veces sobre la misma base:
+282 peticiones y 361 aserciones, sin fallos. /v3/api-docs documenta 115 operaciones.
 
 Segundo bloque de Gordillo, 7 de noviembre de 2026: `mvn -o -Ph2 verify` pasó con
 297 pruebas, sin fallos, errores ni omisiones. Newman ejecutó la colección completa:
@@ -276,7 +302,7 @@ Juan Pablo documenta autenticación, variables y contrato de errores; Valentina 
 sus nueve entidades y prepara ejemplos de datos; Gordillo documenta las suyas y el flujo
 de reservas. Cada integrante graba y explica su bloque. Entre los tres se ejecuta la
 colección completa, se comprueba que MVC sigue funcionando y se despliega el WAR.
-La versión de Java/Tomcat de IAsLab sigue pendiente de confirmar antes de desplegar.
+El servidor de IAsLab usa Tomcat 11 y Java 21, compatibles con el WAR; falta configurar allí las variables de Oracle y JWT.
 No se considera cumplido el despliegue solo por generar un WAR.
 
 Antes de cada commit: revisar git diff, ejecutar las pruebas del bloque y usar la
