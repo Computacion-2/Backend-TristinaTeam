@@ -24,6 +24,9 @@ especies y mascotas: 15 operaciones adicionales con control de acceso por propie
 El [segundo bloque de Valentina](docs/VALENTINA_2.md) agrega otras 15 operaciones
 para fotos de mascotas, tipos de servicio y perfiles de cuidadores.
 
+El [tercer bloque de Valentina](docs/VALENTINA_3.md) completa disponibilidad,
+servicios ofrecidos y cuidadores favoritos: otras 15 operaciones REST.
+
 - Java 21.
 - Spring Boot 4.1.1.
 - Spring Data JPA y Hibernate.

@@ -56,7 +56,8 @@ Las pruebas y documentación se hacen con cada bloque, no se dejan para el últi
 Las cinco rutas de Juan Pablo están implementadas desde su tercer commit.
 Las rutas user-profiles, pet-species y pets están implementadas en el primer
 bloque de Valentina. Su segundo bloque implementa pet-photos, service-types y
-caregiver-profiles. Las otras 12 rutas corresponden a los siguientes bloques.
+caregiver-profiles. El tercero completa caregiver-availabilities, caregiver-services
+y favorite-caregivers. Quedan las nueve rutas de Gordillo.
 Las rutas existentes del MVC se conservan.
 
 | Entidad | Responsable | Colección REST propuesta |
@@ -72,7 +73,7 @@ Las rutas existentes del MVC se conservan.
 | PetPhoto | Valentina | /api/v1/pet-photos |
 | ServiceType | Valentina | /api/v1/service-types |
 | CaregiverProfile | Valentina | /api/v1/caregiver-profiles |
-| CaregiverAvailability | Valentina | /api/v1/caregiver-availability |
+| CaregiverAvailability | Valentina | /api/v1/caregiver-availabilities |
 | CaregiverService | Valentina | /api/v1/caregiver-services |
 | FavoriteCaregiver | Valentina | /api/v1/favorite-caregivers |
 | BookingStatus | Gordillo | /api/v1/booking-statuses |
@@ -191,7 +192,22 @@ elección de foto principal y controles de relaciones. Amplía Postman a
 97 peticiones. Consultar [VALENTINA_2.md](VALENTINA_2.md).
 Quedan tres entidades de Valentina y nueve de Gordillo.
 
+## Tercer commit de Valentina
+
+Implementa CaregiverAvailability, CaregiverService y FavoriteCaregiver: 15 operaciones,
+DTOs, MapStruct, validaciones de horarios/tarifas, acceso por cuidador/ADMIN y
+favoritos privados con reemplazo transaccional. Postman llega a 136 peticiones.
+Consultar [VALENTINA_3.md](VALENTINA_3.md). Quedan completas las nueve entidades de
+Valentina y pendientes las nueve de Gordillo; 14 de las 23 entidades tienen CRUD REST.
+El despliegue, la ejecución conjunta de Postman y los videos siguen pendientes.
+
 ## Verificación de los bloques completados
+
+Tercer bloque de Valentina, 7 de noviembre de 2026: `mvn -o verify` pasó con
+284 pruebas, sin fallos, errores ni omisiones, y generó el WAR. Las 13 pruebas
+nuevas cubren horarios, tarifas, privacidad, claves compuestas, favoritos,
+perfiles/roles inactivos y Swagger. Se validaron JSON y scripts de las 136
+peticiones de Postman; todavía no se ha ejecutado la colección completa.
 
 Segundo bloque de Valentina, 6 de noviembre de 2026: `mvn -o verify` pasó
 con 271 pruebas, sin fallos, errores ni omisiones, y generó el WAR.

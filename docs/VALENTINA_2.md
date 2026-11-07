@@ -117,7 +117,8 @@ Para conservar todas las relaciones, desactivar con activeFlag=N en lugar de bor
 
 Swagger: /swagger-ui/index.html. Se documentan las 15 operaciones nuevas.
 
-La colección completa contiene 97 peticiones en 13 carpetas:
+Este bloque dejó 97 peticiones en 13 carpetas. El [tercer bloque](VALENTINA_3.md)
+amplía la colección a 136 peticiones en 16 carpetas. El recorrido original fue:
 - Las carpetas 10, 11 y 12 cubren fotos, tipos de servicio y cuidadores.
 - La selección de la foto principal se comprueba leyendo la foto anterior.
 - El perfil de cuidador se crea con ownerToken, después de que ADMIN asigne
@@ -144,8 +145,8 @@ Cubren los CRUD, auditoría, foto principal, URLs duplicadas/inválidas, privaci
 permisos de catálogo, conflictos de servicio en uso, rol CAREGIVER,
 experiencia inválida, directorio activo y generación de Swagger.
 
-A Valentina le queda su tercer bloque: CaregiverAvailability, CaregiverService y
-FavoriteCaregiver, con pruebas, Swagger y Postman. El despliegue y los videos
+El [tercer bloque](VALENTINA_3.md) completa CaregiverAvailability, CaregiverService
+y FavoriteCaregiver, con pruebas, Swagger y Postman. El despliegue y los videos
 siguen formando parte de la entrega compartida.
 
 Verificación del 6 de noviembre de 2026: `mvn -o verify` terminó con BUILD SUCCESS,
