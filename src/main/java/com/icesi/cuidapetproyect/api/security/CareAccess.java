@@ -53,4 +53,16 @@ public class CareAccess {
             throw new AccessDeniedException("La postulación no está disponible para este usuario");
         }
     }
+
+    public boolean isBookingParticipant(CareBooking booking, Authentication auth) {
+        if (access.isAdmin(auth)) return true;
+        Long userId = currentUserId(auth);
+        return booking.getOwner().getId().equals(userId) || booking.getCaregiver().getId().equals(userId);
+    }
+
+    public void requireBookingParticipant(CareBooking booking, Authentication auth) {
+        if (!isBookingParticipant(booking, auth)) {
+            throw new AccessDeniedException("La reserva no está disponible para este usuario");
+        }
+    }
 }

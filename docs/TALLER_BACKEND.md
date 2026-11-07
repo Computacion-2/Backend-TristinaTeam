@@ -58,7 +58,8 @@ Las rutas user-profiles, pet-species y pets están implementadas en el primer
 bloque de Valentina. Su segundo bloque implementa pet-photos, service-types y
 caregiver-profiles. El tercero completa caregiver-availabilities, caregiver-services
 y favorite-caregivers. El primer bloque de Gordillo implementa booking-statuses,
-care-requests y care-applications.
+care-requests y care-applications; el segundo, care-bookings, care-updates y
+care-update-photos.
 Las rutas existentes del MVC se conservan.
 
 | Entidad | Responsable | Colección REST propuesta |
@@ -212,7 +213,19 @@ usuario (500 por la relación inversa con AppUser) y agrega el perfil Maven `h2`
 para ejecutar las pruebas sin Oracle. Postman llega a 183 peticiones.
 Consultar [GORDILLO_1.md](GORDILLO_1.md). Quedan seis entidades de Gordillo.
 
+## Segundo commit de Gordillo
+
+Implementa CareBooking, CareUpdate y CareUpdatePhoto: 15 operaciones, DTOs, MapStruct,
+reserva creada al aceptar una postulación, máquina de estados con permisos por
+participante, novedades y fotos solo durante el cuidado, notificaciones automáticas
+y borrado de ADMIN que reabre la solicitud. Postman llega a 235 peticiones.
+Consultar [GORDILLO_2.md](GORDILLO_2.md). Quedan tres entidades de Gordillo.
+
 ## Verificación de los bloques completados
+
+Segundo bloque de Gordillo, 7 de noviembre de 2026: `mvn -o -Ph2 verify` pasó con
+297 pruebas, sin fallos, errores ni omisiones. Newman ejecutó la colección completa:
+235 peticiones, 293 aserciones, sin fallos.
 
 Primer bloque de Gordillo, 7 de noviembre de 2026: `mvn -o -Ph2 verify` pasó con
 291 pruebas, sin fallos, errores ni omisiones, y generó el WAR. La colección de

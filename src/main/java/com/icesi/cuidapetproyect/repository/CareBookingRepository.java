@@ -13,4 +13,5 @@ public interface CareBookingRepository
 
     Optional<CareBooking> findByRequest_Id(Long requestId);
     boolean existsByBookingStatus_StatusCode(String statusCode);
+    boolean existsByAcceptedApplication_Id(Long applicationId);
 }

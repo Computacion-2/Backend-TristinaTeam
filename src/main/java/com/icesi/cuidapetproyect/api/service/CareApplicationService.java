@@ -22,6 +22,7 @@ public class CareApplicationService {
     private final CareApplicationRepository repository;
     private final CareRequestRepository requests;
     private final CaregiverServiceRepository offerings;
+    private final CareBookingRepository bookings;
     private final CareApplicationMapper mapper;
     private final ResourceAccess access;
     private final CaregiverAccess caregivers;
@@ -97,7 +98,7 @@ public class CareApplicationService {
     public void delete(Long id, Authentication auth) {
         CareApplication application = require(id);
         access.requireOwnerOrAdmin(application.getCaregiver().getId(), auth);
-        if ("ACCEPTED".equals(application.getApplicationStatus())) {
+        if (bookings.existsByAcceptedApplication_Id(id)) {
             throw new ConflictException("No se puede eliminar una postulación aceptada en una reserva");
         }
         repository.delete(application);

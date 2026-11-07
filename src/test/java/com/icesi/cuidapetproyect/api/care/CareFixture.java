@@ -157,4 +157,29 @@ abstract class CareFixture {
                 """.formatted(requestId, caregiver.getId(), rate))
                 .andExpect(status().isCreated()).andExpect(jsonPath("$.applicationStatus").value("PENDING")));
     }
+
+    protected long book(long applicationId) throws Exception {
+        return id(send(post("/api/v1/care-bookings"), ownerToken,
+                "{\"applicationId\":%d,\"exactAddress\":\"Calle 5 # 10-20\"}".formatted(applicationId))
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.bookingStatusCode").value("SCHEDULED")));
+    }
+
+    protected ResultActions changeBooking(long bookingId, String token, String status, String reason) throws Exception {
+        return send(put("/api/v1/care-bookings/" + bookingId), token,
+                "{\"bookingStatusCode\":\"%s\",\"exactAddress\":\"Calle 5 # 10-20\",\"cancellationReason\":%s}"
+                        .formatted(status, reason == null ? "null" : "\"" + reason + "\""));
+    }
+
+    protected long startedBooking() throws Exception {
+        long booking = book(apply(createRequest(), "45000"));
+        changeBooking(booking, caregiverToken, "IN_PROGRESS", null).andExpect(status().isOk());
+        return booking;
+    }
+
+    protected long completedBooking() throws Exception {
+        long booking = startedBooking();
+        changeBooking(booking, caregiverToken, "PENDING_CONFIRMATION", null).andExpect(status().isOk());
+        changeBooking(booking, ownerToken, "COMPLETED", null).andExpect(status().isOk());
+        return booking;
+    }
 }

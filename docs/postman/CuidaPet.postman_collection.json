@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "CuidaPet Backend",
-    "description": "Bloques completados: Juan Pablo y Valentina 1/2. Ejecutar toda la colección con una cuenta ACTIVE, rol ADMIN y permisos MANAGE_USERS/MANAGE_ROLES. Requiere OWNER y CAREGIVER activos con permisos. Crea datos únicos; limpieza al final; el usuario de prueba queda DELETED.\nTercer bloque de Valentina: disponibilidad, servicios ofrecidos y favoritos; ejecutar en orden hasta la limpieza final.\nGordillo, bloque 1: estados de reserva, solicitudes y postulaciones. El segundo cuidador inicia sesión con la contraseña generada para la ejecución.",
+    "description": "Bloques completados: Juan Pablo y Valentina 1/2. Ejecutar toda la colección con una cuenta ACTIVE, rol ADMIN y permisos MANAGE_USERS/MANAGE_ROLES. Requiere OWNER y CAREGIVER activos con permisos. Crea datos únicos; limpieza al final; el usuario de prueba queda DELETED.\nTercer bloque de Valentina: disponibilidad, servicios ofrecidos y favoritos; ejecutar en orden hasta la limpieza final.\nGordillo, bloque 1: estados de reserva, solicitudes y postulaciones. El segundo cuidador inicia sesión con la contraseña generada para la ejecución.\nGordillo, bloque 2: reservas, transiciones de estado, novedades, fotos y cancelación.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -40,7 +40,8 @@
                   "[\"photoId\",\"secondPhotoId\",\"serviceTypeId\",\"caregiverRoleId\"].forEach(key => pm.environment.unset(key));",
                   "[\"availabilityId\",\"secondCaregiverId\"].forEach(key=>pm.environment.unset(key));",
                   "pm.environment.unset(\"thirdCaregiverId\");",
-                  "[\"cancelledStatusName\",\"scheduledStatusName\",\"careStart\",\"careEnd\",\"careRequestId\",\"secondCareRequestId\",\"caregiverToken\",\"careApplicationId\",\"rejectedApplicationId\"].forEach(key => pm.environment.unset(key));"
+                  "[\"cancelledStatusName\",\"scheduledStatusName\",\"careStart\",\"careEnd\",\"careRequestId\",\"secondCareRequestId\",\"caregiverToken\",\"careApplicationId\",\"rejectedApplicationId\"].forEach(key => pm.environment.unset(key));",
+                  "[\"careBookingId\",\"careUpdateId\",\"secondCareUpdateId\",\"careUpdatePhotoId\",\"secondCareUpdatePhotoId\",\"thirdCareRequestId\",\"thirdApplicationId\",\"cancelledBookingId\"].forEach(key => pm.environment.unset(key));"
                 ]
               }
             },
@@ -4945,10 +4946,1903 @@
       ]
     },
     {
-      "name": "19 - Limpieza de los bloques completados",
+      "name": "19 - Gordillo: reservas",
       "item": [
         {
-          "name": "Eliminar postulación pendiente",
+          "name": "El cuidador no crea reservas: 403",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/care-bookings",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"applicationId\":{{careApplicationId}},\"exactAddress\":\"Calle 5 # 10-20\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{caregiverToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Dirección vacía: 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/care-bookings",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"applicationId\":{{careApplicationId}},\"exactAddress\":\" \"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear reserva aceptando la postulación",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/care-bookings",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"applicationId\":{{careApplicationId}},\"exactAddress\":\"Calle 5 # 10-20\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "if (pm.response.code === 201) pm.environment.set(\"careBookingId\", pm.response.json().id);",
+                  "pm.test(\"bookingStatusCode = SCHEDULED\", () => pm.expect(pm.response.json().bookingStatusCode).to.eql(\"SCHEDULED\"));",
+                  "pm.test(\"agreedRate = 42000\", () => pm.expect(pm.response.json().agreedRate).to.eql(42000));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reserva duplicada: 409",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/care-bookings",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"applicationId\":{{careApplicationId}},\"exactAddress\":\"Calle 5 # 10-20\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "La postulación queda aceptada",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/care-applications/{{careApplicationId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{caregiverToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"applicationStatus = ACCEPTED\", () => pm.expect(pm.response.json().applicationStatus).to.eql(\"ACCEPTED\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "La solicitud queda asignada",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/care-requests/{{careRequestId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"requestStatus = ASSIGNED\", () => pm.expect(pm.response.json().requestStatus).to.eql(\"ASSIGNED\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar reservas del cuidador",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/care-bookings",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{caregiverToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Incluye la reserva\", () => pm.expect(pm.response.json().map(b => b.id)).to.include(Number(pm.environment.get(\"careBookingId\"))));",
+                  "pm.test(\"Solo reservas propias\", () => pm.response.json().forEach(b => pm.expect(b.caregiverId).to.eql(Number(pm.environment.get(\"secondCaregiverId\")))));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consultar reserva",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/care-bookings/{{careBookingId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"ownerConfirmedFlag = N\", () => pm.expect(pm.response.json().ownerConfirmedFlag).to.eql(\"N\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cambiar dirección antes de iniciar",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/care-bookings/{{careBookingId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"bookingStatusCode\":\"SCHEDULED\",\"exactAddress\":\"Carrera 80 # 1-50\",\"cancellationReason\":null}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"exactAddress = Carrera 80 # 1-50\", () => pm.expect(pm.response.json().exactAddress).to.eql(\"Carrera 80 # 1-50\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "El propietario no inicia el cuidado: 403",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/care-bookings/{{careBookingId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"bookingStatusCode\":\"IN_PROGRESS\",\"exactAddress\":\"Carrera 80 # 1-50\",\"cancellationReason\":null}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Transición inválida: 409",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/care-bookings/{{careBookingId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"bookingStatusCode\":\"COMPLETED\",\"exactAddress\":\"Carrera 80 # 1-50\",\"cancellationReason\":null}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{caregiverToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Iniciar el cuidado",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/care-bookings/{{careBookingId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"bookingStatusCode\":\"IN_PROGRESS\",\"exactAddress\":\"Carrera 80 # 1-50\",\"cancellationReason\":null}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{caregiverToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"bookingStatusCode = IN_PROGRESS\", () => pm.expect(pm.response.json().bookingStatusCode).to.eql(\"IN_PROGRESS\"));",
+                  "pm.test(\"Fecha de inicio\", () => pm.expect(pm.response.json().startedAt).to.be.a(\"string\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Dirección fija durante el cuidado: 409",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/care-bookings/{{careBookingId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"bookingStatusCode\":\"IN_PROGRESS\",\"exactAddress\":\"Otra dirección\",\"cancellationReason\":null}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "20 - Gordillo: novedades y fotos del cuidado",
+      "item": [
+        {
+          "name": "Registrar novedad",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/care-updates",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"bookingId\":{{careBookingId}},\"updateMessage\":\"Llegamos al parque\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{caregiverToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "if (pm.response.code === 201) pm.environment.set(\"careUpdateId\", pm.response.json().id);",
+                  "pm.test(\"caregiverId = Number(pm.environment.get(secondCaregiverId))\", () => pm.expect(pm.response.json().caregiverId).to.eql(Number(pm.environment.get(\"secondCaregiverId\"))));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "El propietario no registra novedades: 403",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/care-updates",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"bookingId\":{{careBookingId}},\"updateMessage\":\"No permitido\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar novedades del propietario",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/care-updates",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Incluye la novedad\", () => pm.expect(pm.response.json().map(u => u.id)).to.include(Number(pm.environment.get(\"careUpdateId\"))));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consultar novedad",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/care-updates/{{careUpdateId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Editar novedad",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/care-updates/{{careUpdateId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"updateMessage\":\"Paseo terminado, comió bien\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{caregiverToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"updateMessage = Paseo terminado, comió bien\", () => pm.expect(pm.response.json().updateMessage).to.eql(\"Paseo terminado, comió bien\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Mensaje vacío: 400",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/care-updates/{{careUpdateId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"updateMessage\":\"\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{caregiverToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Agregar foto a la novedad",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/care-update-photos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"updateId\":{{careUpdateId}},\"photoUrl\":\"https://fotos.example.com/{{runId}}/parque.jpg\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{caregiverToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "if (pm.response.code === 201) pm.environment.set(\"careUpdatePhotoId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Foto duplicada: 409",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/care-update-photos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"updateId\":{{careUpdateId}},\"photoUrl\":\"https://fotos.example.com/{{runId}}/parque.jpg\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{caregiverToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "URL inválida: 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/care-update-photos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"updateId\":{{careUpdateId}},\"photoUrl\":\"archivo-local.jpg\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{caregiverToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "El propietario no agrega fotos: 403",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/care-update-photos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"updateId\":{{careUpdateId}},\"photoUrl\":\"https://fotos.example.com/{{runId}}/otra.jpg\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Agregar segunda foto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/care-update-photos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"updateId\":{{careUpdateId}},\"photoUrl\":\"https://fotos.example.com/{{runId}}/agua.jpg\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{caregiverToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "if (pm.response.code === 201) pm.environment.set(\"secondCareUpdatePhotoId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar fotos del propietario",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/care-update-photos",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Dos fotos de la novedad\", () => pm.expect(pm.response.json().filter(p => p.updateId === Number(pm.environment.get(\"careUpdateId\"))).length).to.eql(2));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consultar foto",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/care-update-photos/{{careUpdatePhotoId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cambiar URL de la foto",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/care-update-photos/{{careUpdatePhotoId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"photoUrl\":\"https://fotos.example.com/{{runId}}/parque-editada.jpg\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{caregiverToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"URL actualizada\", () => pm.expect(pm.response.json().photoUrl).to.include(\"parque-editada.jpg\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar segunda foto",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/care-update-photos/{{secondCareUpdatePhotoId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{caregiverToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Foto eliminada: 404",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/care-update-photos/{{secondCareUpdatePhotoId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar segunda novedad",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/care-updates",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"bookingId\":{{careBookingId}},\"updateMessage\":\"Novedad temporal\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{caregiverToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "if (pm.response.code === 201) pm.environment.set(\"secondCareUpdateId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar segunda novedad",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/care-updates/{{secondCareUpdateId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{caregiverToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Novedad eliminada: 404",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/care-updates/{{secondCareUpdateId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "El cuidador marca el cuidado como terminado",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/care-bookings/{{careBookingId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"bookingStatusCode\":\"PENDING_CONFIRMATION\",\"exactAddress\":\"Carrera 80 # 1-50\",\"cancellationReason\":null}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{caregiverToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"caregiverDoneFlag = Y\", () => pm.expect(pm.response.json().caregiverDoneFlag).to.eql(\"Y\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "El cuidador no confirma la finalización: 403",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/care-bookings/{{careBookingId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"bookingStatusCode\":\"COMPLETED\",\"exactAddress\":\"Carrera 80 # 1-50\",\"cancellationReason\":null}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{caregiverToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "El propietario confirma la finalización",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/care-bookings/{{careBookingId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"bookingStatusCode\":\"COMPLETED\",\"exactAddress\":\"Carrera 80 # 1-50\",\"cancellationReason\":null}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"bookingStatusCode = COMPLETED\", () => pm.expect(pm.response.json().bookingStatusCode).to.eql(\"COMPLETED\"));",
+                  "pm.test(\"ownerConfirmedFlag = Y\", () => pm.expect(pm.response.json().ownerConfirmedFlag).to.eql(\"Y\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "La solicitud queda cerrada",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/care-requests/{{careRequestId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"requestStatus = CLOSED\", () => pm.expect(pm.response.json().requestStatus).to.eql(\"CLOSED\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reserva finalizada no cambia: 409",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/care-bookings/{{careBookingId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"bookingStatusCode\":\"CANCELLED\",\"exactAddress\":\"Carrera 80 # 1-50\",\"cancellationReason\":\"Tarde\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "No hay novedades tras finalizar: 409",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/care-updates",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"bookingId\":{{careBookingId}},\"updateMessage\":\"Tarde\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{caregiverToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "21 - Gordillo: cancelación de reservas",
+      "item": [
+        {
+          "name": "Crear tercera solicitud",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/care-requests",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"ownerId\":{{createdUserId}},\"petId\":{{petId}},\"serviceTypeId\":{{serviceTypeId}},\"startAt\":\"{{careStart}}\",\"endAt\":\"{{careEnd}}\",\"city\":\"Cali\",\"maxBudget\":50000}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "if (pm.response.code === 201) pm.environment.set(\"thirdCareRequestId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Postularse a la tercera solicitud",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/care-applications",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"requestId\":{{thirdCareRequestId}},\"caregiverId\":{{secondCaregiverId}},\"proposedRate\":38000}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{caregiverToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "if (pm.response.code === 201) pm.environment.set(\"thirdApplicationId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reservar la tercera solicitud",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/care-bookings",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"applicationId\":{{thirdApplicationId}},\"exactAddress\":\"Calle 5 # 10-20\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "if (pm.response.code === 201) pm.environment.set(\"cancelledBookingId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cancelar sin motivo: 400",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/care-bookings/{{cancelledBookingId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"bookingStatusCode\":\"CANCELLED\",\"exactAddress\":\"Calle 5 # 10-20\",\"cancellationReason\":null}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{caregiverToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "El cuidador cancela la reserva",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/care-bookings/{{cancelledBookingId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"bookingStatusCode\":\"CANCELLED\",\"exactAddress\":\"Calle 5 # 10-20\",\"cancellationReason\":\"Imprevisto familiar\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{caregiverToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"bookingStatusCode = CANCELLED\", () => pm.expect(pm.response.json().bookingStatusCode).to.eql(\"CANCELLED\"));",
+                  "pm.test(\"cancellationReason = Imprevisto familiar\", () => pm.expect(pm.response.json().cancellationReason).to.eql(\"Imprevisto familiar\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "La solicitud queda cancelada",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/care-requests/{{thirdCareRequestId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"requestStatus = CANCELLED\", () => pm.expect(pm.response.json().requestStatus).to.eql(\"CANCELLED\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Solo ADMIN elimina reservas: 403",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/care-bookings/{{cancelledBookingId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reserva inexistente: 404",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/care-bookings/999999999"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "22 - Limpieza de los bloques completados",
+      "item": [
+        {
+          "name": "Eliminar reserva cancelada",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/care-bookings/{{cancelledBookingId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reserva eliminada: 404",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/care-bookings/{{cancelledBookingId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar tercera solicitud",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/care-requests/{{thirdCareRequestId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar foto de la novedad",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/care-update-photos/{{careUpdatePhotoId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar novedad",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/care-updates/{{careUpdateId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar reserva completada",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/care-bookings/{{careBookingId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar postulación aceptada sin reserva",
           "request": {
             "method": "DELETE",
             "header": [],
