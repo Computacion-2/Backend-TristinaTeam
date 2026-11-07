@@ -4,6 +4,7 @@ import com.icesi.cuidapetproyect.api.security.JwtService;
 import com.icesi.cuidapetproyect.model.*;
 import com.icesi.cuidapetproyect.repository.*;
 import com.icesi.cuidapetproyect.service.AppUserDetailsService;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -37,6 +38,7 @@ class ProfilePetIntegrationTest {
     @MockitoBean AppUserDetailsService details;
     private AppUser owner, other;
     private PetSpecies petSpecies;
+    @Autowired EntityManager entityManager;
     private String ownerToken, adminToken, suffix;
 
     @BeforeEach
@@ -83,6 +85,18 @@ class ProfilePetIntegrationTest {
         profile.setUser(user);
         profile.setFullName("Perfil privado");
         return profiles.saveAndFlush(profile);
+    }
+
+    @Test
+    void profileDeleteWorksWhenUserIsLoadedWithItsProfile() throws Exception {
+        profile(owner);
+        entityManager.flush();
+        entityManager.clear();
+        mvc.perform(delete("/api/v1/user-profiles/" + owner.getId()).header("Authorization", ownerToken))
+                .andExpect(status().isNoContent());
+        entityManager.clear();
+        mvc.perform(get("/api/v1/user-profiles/" + owner.getId()).header("Authorization", adminToken))
+                .andExpect(status().isNotFound());
     }
 
     @Test

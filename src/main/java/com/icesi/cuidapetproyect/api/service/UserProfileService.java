@@ -62,7 +62,10 @@ public class UserProfileService {
     @Transactional
     public void delete(Long userId, Authentication authentication) {
         access.requireOwnerOrAdmin(userId, authentication);
-        profiles.delete(requireProfile(userId));
+        UserProfile profile = requireProfile(userId);
+        // AppUser.profile es el lado inverso: se desvincula para que Hibernate no conserve el perfil borrado.
+        profile.getUser().setProfile(null);
+        profiles.delete(profile);
         profiles.flush();
     }
 
