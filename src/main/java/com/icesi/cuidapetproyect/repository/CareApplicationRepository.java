@@ -9,4 +9,5 @@ public interface CareApplicationRepository
     List<CareApplication> findByRequest_Id(Long requestId);
 
     List<CareApplication> findByCaregiver_Id(Long caregiverId);
+    boolean existsByRequest_IdAndCaregiver_Id(Long requestId, Long caregiverId);
 }

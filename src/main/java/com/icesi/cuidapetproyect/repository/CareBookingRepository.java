@@ -12,4 +12,5 @@ public interface CareBookingRepository
     List<CareBooking> findByCaregiver_Id(Long caregiverId);
 
     Optional<CareBooking> findByRequest_Id(Long requestId);
+    boolean existsByBookingStatus_StatusCode(String statusCode);
 }

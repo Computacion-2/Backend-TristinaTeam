@@ -81,6 +81,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
@@ -177,5 +183,30 @@
 
         </plugins>
     </build>
+
+    <profiles>
+        <!-- Ejecuta las pruebas sin Oracle: ./mvnw -Ph2 verify -->
+        <profile>
+            <id>h2</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <spring.datasource.url>jdbc:h2:mem:cuidapet;MODE=Oracle;DB_CLOSE_DELAY=-1;DEFAULT_NULL_ORDERING=HIGH</spring.datasource.url>
+                                <spring.datasource.driver-class-name>org.h2.Driver</spring.datasource.driver-class-name>
+                                <spring.datasource.username>sa</spring.datasource.username>
+                                <spring.datasource.password></spring.datasource.password>
+                                <spring.jpa.hibernate.ddl-auto>create-drop</spring.jpa.hibernate.ddl-auto>
+                                <spring.jpa.show-sql>false</spring.jpa.show-sql>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>

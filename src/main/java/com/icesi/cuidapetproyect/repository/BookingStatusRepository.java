@@ -4,5 +4,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface BookingStatusRepository
         extends JpaRepository<BookingStatus, String> {
+    boolean existsByStatusNameIgnoreCase(String statusName);
+    boolean existsByStatusNameIgnoreCaseAndStatusCodeNot(String statusName, String statusCode);
 }
-

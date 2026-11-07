@@ -27,6 +27,10 @@ para fotos de mascotas, tipos de servicio y perfiles de cuidadores.
 El [tercer bloque de Valentina](docs/VALENTINA_3.md) completa disponibilidad,
 servicios ofrecidos y cuidadores favoritos: otras 15 operaciones REST.
 
+El [primer bloque de Gordillo](docs/GORDILLO_1.md) agrega estados de reserva,
+solicitudes de cuidado y postulaciones de cuidadores: otras 15 operaciones REST.
+Las pruebas también se pueden ejecutar sin Oracle con el perfil Maven `h2`.
+
 - Java 21.
 - Spring Boot 4.1.1.
 - Spring Data JPA y Hibernate.
