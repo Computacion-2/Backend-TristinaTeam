@@ -75,3 +75,41 @@ p { max-width: 58ch; margin: 0 0 1.5rem; }
 }
 
 .action:hover { background: #104e3f; }
+
+button, input { font: inherit; }
+
+button:focus-visible,
+input:focus-visible { outline: 3px solid #be7800; outline-offset: 3px; }
+
+button.action {
+  border: 0;
+  cursor: pointer;
+  justify-self: start;
+}
+
+button.action:disabled { opacity: 0.65; cursor: wait; }
+
+.nav-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #145c49;
+  cursor: pointer;
+}
+
+.nav-button:hover { text-decoration: underline; text-underline-offset: 0.3em; }
+.auth-panel { max-width: 34rem; }
+.login-form { display: grid; gap: 0.75rem; }
+.login-form label, .account-info dt { font-weight: 600; }
+
+.login-form input {
+  width: 100%;
+  min-width: 0;
+  margin-bottom: 0.5rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #8ca69e;
+  border-radius: 0.4rem;
+}
+
+.form-error { margin: 0; color: #912c25; }
+.account-info dd { margin: 0.25rem 0 1rem; overflow-wrap: anywhere; }
