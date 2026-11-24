@@ -1,19 +1,16 @@
-import { useAuth } from '../auth/authContext.js'
-
-const permissionNames = { MANAGE_USERS: 'Gestionar usuarios', MANAGE_ROLES: 'Gestionar roles y permisos' }
+import { NavLink, Outlet } from 'react-router'
+import { adminResources } from '../admin/resources.js'
 
 export default function AdminAccessPage() {
-  const { user } = useAuth()
-
   return (
-    <section className="panel">
+    <section className="panel admin-panel">
       <h1>Administración</h1>
-      <h2>Permisos de tu cuenta</h2>
-      <ul>
-        {user.permissions.map((permission) => (
-          <li key={permission}>{permissionNames[permission] || permission}</li>
+      <nav className="admin-nav" aria-label="Secciones de administración">
+        {Object.entries(adminResources).map(([segment, resource]) => (
+          <NavLink key={segment} to={segment} end>{resource.title}</NavLink>
         ))}
-      </ul>
+      </nav>
+      <Outlet />
     </section>
   )
 }

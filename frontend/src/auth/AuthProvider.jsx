@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { apiRequest } from '../api/apiClient.js'
+import { useCallback, useEffect, useState } from 'react'
+import { ApiError, apiRequest } from '../api/apiClient.js'
 import { AuthContext } from './authContext.js'
 
 const storageKey = 'cuidapet.session'
@@ -93,8 +93,20 @@ export default function AuthProvider({ children }) {
     setSession(signedOut())
   }
 
+  const request = useCallback(async (path, options = {}) => {
+    if (!credentials) throw new ApiError(expiredMessage, 401)
+    try {
+      return await apiRequest(path, { ...options, token: credentials.accessToken })
+    } catch (error) {
+      if (error.status === 401 && !options.signal?.aborted) {
+        setSession((active) => active.credentials === credentials ? signedOut(expiredMessage) : active)
+      }
+      throw error
+    }
+  }, [credentials])
+
   return (
-    <AuthContext.Provider value={{ user, message, checkingSession, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, message, checkingSession, signIn, signOut, request }}>
       {children}
     </AuthContext.Provider>
   )
