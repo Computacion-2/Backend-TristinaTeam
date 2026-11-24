@@ -1,4 +1,6 @@
-import { NavLink, Route, Routes, useNavigate } from 'react-router'
+import { Navigate, NavLink, Route, Routes, useNavigate } from 'react-router'
+import AdminResource from './admin/AdminResource.jsx'
+import { adminResources } from './admin/resources.js'
 import { administrationAccess } from './auth/access.js'
 import { useAuth } from './auth/authContext.js'
 import ProtectedRoute from './auth/ProtectedRoute.jsx'
@@ -45,7 +47,12 @@ export default function App() {
             <Route path="/cuenta" element={<AccountPage />} />
           </Route>
           <Route element={<ProtectedRoute access={administrationAccess} />}>
-            <Route path="/administracion" element={<AdminAccessPage />} />
+            <Route path="/administracion" element={<AdminAccessPage />}>
+              <Route index element={<Navigate to="usuarios" replace />} />
+              {Object.entries(adminResources).map(([segment, resource]) => (
+                <Route key={segment} path={segment} element={<AdminResource key={segment} resource={resource} />} />
+              ))}
+            </Route>
           </Route>
           <Route path="*" element={<NotFoundPage />} />
         </Routes>

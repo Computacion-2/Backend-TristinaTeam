@@ -22,6 +22,12 @@ Arranca Spring Boot según la [guía del backend](../docs/DESPLIEGUE.md) cuando 
 - Abre `/administracion` para comprobar el acceso. La ruta requiere el rol `ADMIN` y los permisos `MANAGE_USERS` y `MANAGE_ROLES`. Spring Boot aplica la autorización de las operaciones del API.
 - Cierra sesión desde la navegación. Al vencer el token, la SPA también descarta la sesión y solicita un nuevo inicio de sesión para entrar a una ruta privada.
 
+## Administración
+
+Desde **Mi cuenta**, abre **Administración** con una cuenta autorizada. Las cinco secciones consumen el CRUD de [seguridad del backend](../docs/API_SEGURIDAD.md). En **Usuarios** y **Roles** se escogen las asociaciones iniciales al crear un registro. En **Roles de usuarios** y **Permisos de roles** se pueden añadir, reemplazar y quitar asociaciones existentes.
+
+La edición de un usuario conserva su contraseña si el campo queda vacío. Eliminar un usuario cambia su estado a **Eliminado**. Si el servidor rechaza una operación, el panel muestra su mensaje y mantiene el formulario abierto.
+
 ## Verificación
 
 ```bash

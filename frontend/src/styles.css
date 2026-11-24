@@ -113,3 +113,59 @@ button.action:disabled { opacity: 0.65; cursor: wait; }
 
 .form-error { margin: 0; color: #912c25; }
 .account-info dd { margin: 0.25rem 0 1rem; overflow-wrap: anywhere; }
+
+.admin-panel { padding: clamp(1.25rem, 4vw, 2.5rem); }
+.admin-nav { margin-bottom: 1.5rem; padding-block: 0.75rem; border-bottom: 1px solid #dbe6e2; }
+.admin-nav a[aria-current="page"] { font-weight: 700; }
+
+.admin-resource-header,
+.admin-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+
+.admin-resource-header { justify-content: space-between; margin-bottom: 1rem; }
+.admin-resource-header h2, .admin-editor h3 { margin: 0; }
+.admin-table-scroll { overflow-x: auto; }
+.admin-table { width: 100%; border-collapse: collapse; text-align: left; }
+.admin-table th { background: #edf5f1; }
+
+.admin-table th,
+.admin-table td { padding: 0.65rem; border-bottom: 1px solid #dbe6e2; overflow-wrap: anywhere; }
+
+.admin-table td:last-child { min-width: 9rem; }
+.admin-table .action { padding: 0.35rem 0.65rem; }
+.action.secondary { background: #e6efeb; color: #145c49; }
+.action.secondary:hover { background: #d5e6de; }
+.action.danger { background: #912c25; }
+.action.danger:hover { background: #712019; }
+
+.admin-editor {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border: 1px solid #dbe6e2;
+  border-radius: 0.6rem;
+  background: #f6faf8;
+}
+
+.admin-editor p { margin-bottom: 0; }
+.admin-fields { display: grid; gap: 0.75rem; margin: 0; padding: 0; border: 0; min-width: 0; }
+.admin-field { display: grid; gap: 0.25rem; max-width: 32rem; }
+.admin-field label, .admin-choices legend { font-weight: 600; }
+.admin-field select, .admin-field textarea { font: inherit; }
+
+.admin-field input,
+.admin-field select,
+.admin-field textarea {
+  min-width: 0;
+  width: 100%;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid #8ca69e;
+  border-radius: 0.4rem;
+  background: white;
+}
+
+.admin-field select:focus-visible,
+.admin-field textarea:focus-visible { outline: 3px solid #be7800; outline-offset: 3px; }
+
+.admin-choices { display: grid; gap: 0.25rem; margin: 0; border: 1px solid #dbe6e2; }
+.admin-choices label { display: flex; align-items: center; gap: 0.5rem; overflow-wrap: anywhere; }
