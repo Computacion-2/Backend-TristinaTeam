@@ -28,6 +28,13 @@ Desde **Mi cuenta**, abre **Administración** con una cuenta autorizada. Las cin
 
 La edición de un usuario conserva su contraseña si el campo queda vacío. Eliminar un usuario cambia su estado a **Eliminado**. Si el servidor rechaza una operación, el panel muestra su mensaje y mantiene el formulario abierto.
 
+## Componentes compartidos
+
+- `FormField` enlaza la etiqueta y la ayuda con el control. Usa `as="select"` o `as="textarea"` para reutilizarlo con otros campos nativos.
+- `Button` ofrece variantes primaria, secundaria y de peligro. Usa `busy` y `busyLabel` durante una operación.
+- `Feedback` muestra mensajes informativos, de carga, éxito y error. `Confirmation` permite confirmar o cancelar una acción y mostrar el error si falla.
+- Los colores, espaciados y bordes compartidos están en las variables de `src/styles.css`.
+
 ## Verificación
 
 ```bash

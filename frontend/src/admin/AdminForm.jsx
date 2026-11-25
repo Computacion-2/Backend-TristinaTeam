@@ -1,17 +1,19 @@
 import { useEffect, useRef, useState } from 'react'
+import Button from '../components/Button.jsx'
+import Feedback from '../components/Feedback.jsx'
+import FormField from '../components/FormField.jsx'
 import { catalogs } from './resources.js'
 
-function FormField({ field, record, lookups }) {
+function AdminField({ field, record, lookups }) {
   const { name, label, type, catalog, multiple, options, activeOnly, ...constraints } = field
   const value = record?.[name] ?? ''
-  const id = `admin-${name}`
   const choices = catalog
     ? lookups[catalog].filter((entry) => !activeOnly || entry.activeFlag === 'Y' || entry.id === value)
     : []
 
   if (multiple) {
     return (
-      <fieldset className="admin-choices">
+      <fieldset className="choice-group">
         <legend>{label}</legend>
         {choices.length === 0 && <p>No hay opciones disponibles.</p>}
         {choices.map((entry) => (
@@ -24,29 +26,30 @@ function FormField({ field, record, lookups }) {
     )
   }
 
+  if (catalog || options) {
+    return (
+      <FormField as="select" label={label} name={name} defaultValue={value} required={constraints.required}>
+        <option value="">Selecciona una opción</option>
+        {catalog
+          ? choices.map((entry) => <option key={entry.id} value={entry.id}>{entry[catalogs[catalog].label]}</option>)
+          : Object.entries(options).map(([key, text]) => <option key={key} value={key}>{text}</option>)}
+      </FormField>
+    )
+  }
+
+  if (type === 'textarea') {
+    return <FormField as="textarea" label={label} name={name} defaultValue={value} rows={3} {...constraints} />
+  }
+
   return (
-    <div className="admin-field">
-      <label htmlFor={id}>{label}</label>
-      {(catalog || options) ? (
-        <select id={id} name={name} defaultValue={value} required={constraints.required}>
-          <option value="">Selecciona una opción</option>
-          {catalog
-            ? choices.map((entry) => <option key={entry.id} value={entry.id}>{entry[catalogs[catalog].label]}</option>)
-            : Object.entries(options).map(([key, text]) => <option key={key} value={key}>{text}</option>)}
-        </select>
-      ) : type === 'textarea' ? (
-        <textarea id={id} name={name} defaultValue={value} rows={3} {...constraints} />
-      ) : (
-        <input
-          id={id}
-          name={name}
-          type={type ?? 'text'}
-          defaultValue={value}
-          autoComplete={type === 'password' ? 'new-password' : undefined}
-          {...constraints}
-        />
-      )}
-    </div>
+    <FormField
+      label={label}
+      name={name}
+      type={type ?? 'text'}
+      defaultValue={value}
+      autoComplete={type === 'password' ? 'new-password' : undefined}
+      {...constraints}
+    />
   )
 }
 
@@ -76,15 +79,15 @@ export default function AdminForm({ fields, record, lookups, title, saving, erro
   }
 
   return (
-    <form className="admin-editor" onSubmit={submit}>
+    <form className="form-panel" onSubmit={submit}>
       <h3 ref={heading} tabIndex={-1}>{title}</h3>
-      <fieldset className="admin-fields" disabled={saving}>
-        {fields.map((field) => <FormField key={field.name} field={field} record={record} lookups={lookups} />)}
+      <fieldset className="form-fields" disabled={saving}>
+        {fields.map((field) => <AdminField key={field.name} field={field} record={record} lookups={lookups} />)}
       </fieldset>
-      {(validation || error) && <p className="form-error" role="alert">{validation || error}</p>}
-      <div className="admin-actions">
-        <button className="action" disabled={saving}>{saving ? 'Guardando…' : 'Guardar'}</button>
-        <button className="action secondary" type="button" disabled={saving} onClick={onCancel}>Cancelar</button>
+      <Feedback kind="error">{validation || error}</Feedback>
+      <div className="form-actions">
+        <Button type="submit" busy={saving} busyLabel="Guardando…">Guardar</Button>
+        <Button variant="secondary" disabled={saving} onClick={onCancel}>Cancelar</Button>
       </div>
     </form>
   )

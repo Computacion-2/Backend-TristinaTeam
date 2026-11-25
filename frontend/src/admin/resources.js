@@ -41,7 +41,7 @@ export const adminResources = {
     create: [email, { ...password, required: true }, field('roleIds', 'Roles iniciales', {
       catalog: 'roles', multiple: true, activeOnly: true,
     })],
-    edit: [email, { ...password, label: 'Nueva contraseña (opcional)' }, field('accountStatus', 'Estado', {
+    edit: [email, { ...password, label: 'Nueva contraseña (opcional)', hint: 'Déjala vacía para conservar la contraseña.' }, field('accountStatus', 'Estado', {
       options: userStatuses, required: true,
     })],
     removeText: 'La cuenta quedará en estado Eliminado y perderá el acceso.',
