@@ -1,6 +1,8 @@
 package com.icesi.cuidapetproyect.api;
 
 import com.icesi.cuidapetproyect.api.security.JwtService;
+import com.icesi.cuidapetproyect.model.AppUser;
+import com.icesi.cuidapetproyect.repository.AppUserRepository;
 import com.icesi.cuidapetproyect.service.AppUserDetailsService;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,7 @@ import org.springframework.security.oauth2.jwt.*;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.json.JsonMapper;
+import java.util.Optional;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -29,6 +32,7 @@ class ApiAuthenticationTest {
     @Autowired JwtService tokens;
     @Autowired JwtDecoder decoder;
     @MockitoBean AppUserDetailsService users;
+    @MockitoBean AppUserRepository accounts;
     private UserDetails owner;
     private UserDetails manager;
 
@@ -40,6 +44,12 @@ class ApiAuthenticationTest {
                 .authorities("ROLE_ADMIN", "MANAGE_USERS", "MANAGE_ROLES").build();
         when(users.loadUserByUsername(owner.getUsername())).thenReturn(owner);
         when(users.loadUserByUsername(manager.getUsername())).thenReturn(manager);
+        AppUser ownerAccount = new AppUser();
+        ownerAccount.setId(11L);
+        AppUser managerAccount = new AppUser();
+        managerAccount.setId(12L);
+        when(accounts.findByEmail(owner.getUsername())).thenReturn(Optional.of(ownerAccount));
+        when(accounts.findByEmail(manager.getUsername())).thenReturn(Optional.of(managerAccount));
     }
 
     @Test
@@ -63,7 +73,9 @@ class ApiAuthenticationTest {
         assertFalse(jwt.getClaims().containsKey("password"));
         assertFalse(jwt.getClaims().containsKey("passwordHash"));
         mvc.perform(get("/api/v1/auth/me").header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.email").value(owner.getUsername()));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email").value(owner.getUsername()))
+                .andExpect(jsonPath("$.userId").value(11));
     }
 
     @Test
@@ -110,7 +122,9 @@ class ApiAuthenticationTest {
         mvc.perform(get("/api/v1/users").header("Authorization", "Bearer " + token))
                 .andExpect(status().isForbidden());
         mvc.perform(get("/api/v1/auth/me").header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.roles[0]").value("OWNER"));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.roles[0]").value("OWNER"))
+                .andExpect(jsonPath("$.userId").value(12));
     }
 
     @Test

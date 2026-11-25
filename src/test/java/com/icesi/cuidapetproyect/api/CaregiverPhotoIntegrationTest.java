@@ -135,6 +135,14 @@ class CaregiverPhotoIntegrationTest {
     }
 
     @Test
+    void deletingPetAlsoRemovesItsPhotos() throws Exception {
+        createPhoto("https://example.com/pet-photo.jpg", "Y");
+        mvc.perform(delete("/api/v1/pets/" + pet.getId()).header("Authorization", ownerToken))
+                .andExpect(status().isNoContent());
+        assertTrue(photos.findByPet_Id(pet.getId()).isEmpty());
+    }
+
+    @Test
     void foreignPhotosArePrivateAndCannotBeModified() throws Exception {
         PetPhoto foreign = new PetPhoto();
         foreign.setPet(foreignPet);

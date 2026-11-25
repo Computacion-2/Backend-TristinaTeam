@@ -232,6 +232,69 @@ textarea.form-control { resize: vertical; }
 .choice-group { display: grid; gap: var(--space-1); margin: 0; border: 1px solid var(--color-border); }
 .choice-group label { display: flex; align-items: center; gap: var(--space-2); overflow-wrap: anywhere; }
 
+.personal-section { margin-top: var(--space-5); }
+section.personal-section { padding-top: var(--space-5); border-top: 1px solid var(--color-border); }
+.personal-section h2, .record-card h2 { margin-top: 0; }
+.personal-section .form-panel, .personal-details + .form-panel { margin-top: var(--space-3); }
+.pet-title { margin-top: var(--space-4); }
+
+.profile-details {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.profile-photo {
+  width: 5rem;
+  height: 5rem;
+  object-fit: cover;
+  border-radius: 50%;
+  background: var(--color-secondary);
+}
+
+.profile-details dl,
+.personal-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  min-width: 0;
+  margin: 0 0 var(--space-4);
+}
+
+.profile-details dl div, .personal-details div { min-width: min(100%, 11rem); max-width: 100%; }
+.personal-details dd { white-space: pre-wrap; }
+
+.record-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: var(--space-4);
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.record-card {
+  min-width: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface-soft);
+  overflow-wrap: anywhere;
+}
+
+.record-card p { margin: 0; }
+.photo-grid .record-card { display: grid; align-content: start; gap: var(--space-2); }
+.photo-grid img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--radius-control);
+  background: var(--color-secondary);
+}
+
 @media (max-width: 30rem) {
   .container { width: calc(100% - 1.25rem); }
   .main-content { padding-block: var(--space-5); }

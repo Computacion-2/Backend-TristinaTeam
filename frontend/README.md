@@ -35,6 +35,12 @@ La edición de un usuario conserva su contraseña si el campo queda vacío. Elim
 - `Feedback` muestra mensajes informativos, de carga, éxito y error. `Confirmation` permite confirmar o cancelar una acción y mostrar el error si falla.
 - Los colores, espaciados y bordes compartidos están en las variables de `src/styles.css`.
 
+## Perfil y mascotas
+
+En **Mi cuenta** puedes crear, editar y eliminar tu perfil. **Mis mascotas** lista las mascotas de tu cuenta, permite registrarlas con una especie activa y abre su ficha para editar, archivar o eliminar. En **Fotos**, añade una URL HTTP o HTTPS y puedes marcarla como principal. La galería se actualiza con la selección devuelta por el backend.
+
+Estas pantallas requieren el backend actualizado. El frontend obtiene el identificador de la cuenta desde `GET /api/v1/auth/me`, que devuelve `userId` junto con los datos de sesión. Spring Boot verifica la propiedad de los recursos.
+
 ## Verificación
 
 ```bash

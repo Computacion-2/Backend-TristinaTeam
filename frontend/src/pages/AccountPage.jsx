@@ -1,6 +1,7 @@
 import { Link } from 'react-router'
 import { administrationAccess, hasAccess } from '../auth/access.js'
 import { useAuth } from '../auth/authContext.js'
+import ProfilePanel from '../pets/ProfilePanel.jsx'
 
 const roleNames = { ADMIN: 'Administrador', OWNER: 'Propietario', CAREGIVER: 'Cuidador' }
 
@@ -18,6 +19,7 @@ export default function AccountPage() {
         <dd>{user.roles.map((role) => roleNames[role] || role).join(', ') || 'Sin roles asignados'}</dd>
       </dl>
       {canAdminister && <Link className="action" to="/administracion">Administración</Link>}
+      <ProfilePanel />
     </section>
   )
 }
