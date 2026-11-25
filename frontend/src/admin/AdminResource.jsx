@@ -1,5 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useAuth } from '../auth/authContext.js'
+import Button from '../components/Button.jsx'
+import Confirmation from '../components/Confirmation.jsx'
+import Feedback from '../components/Feedback.jsx'
 import AdminForm from './AdminForm.jsx'
 import { catalogs, displayValue, itemPath } from './resources.js'
 
@@ -11,6 +14,8 @@ export default function AdminResource({ resource }) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
+  const editorTrigger = useRef(null)
+  const actionsDisabled = busy || Boolean(editor)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -35,19 +40,27 @@ export default function AdminResource({ resource }) {
     setRevision((value) => value + 1)
   }
 
-  function openEditor(mode, record) {
+  function openEditor(mode, record, trigger) {
+    editorTrigger.current = trigger
     setError('')
     setNotice('')
     setEditor({ mode, record })
   }
 
-  async function edit(row) {
+  function cancelEditor() {
+    const trigger = editorTrigger.current
+    setEditor(null)
+    setError('')
+    requestAnimationFrame(() => trigger?.focus())
+  }
+
+  async function edit(row, trigger) {
     if (busy) return
     setError('')
     setNotice('')
     setBusy(true)
     try {
-      openEditor('edit', await request(itemPath(resource, row)))
+      openEditor('edit', await request(itemPath(resource, row)), trigger)
     } catch (failure) {
       setError(failure.message)
     } finally {
@@ -80,36 +93,36 @@ export default function AdminResource({ resource }) {
     <section aria-labelledby="admin-resource-title">
       <div className="admin-resource-header">
         <h2 id="admin-resource-title">{resource.title}</h2>
-        {list?.rows && !editor && (
-          <button className="action" type="button" disabled={busy} onClick={() => openEditor('create')}>
+        {list?.rows && (
+          <Button disabled={actionsDisabled} onClick={(event) => openEditor('create', null, event.currentTarget)}>
             Crear {resource.singular}
-          </button>
+          </Button>
         )}
       </div>
-      {notice && <p role="status">{notice}</p>}
-      {!list && <p role="status">Cargando {resource.title.toLowerCase()}…</p>}
+      <Feedback kind="success">{notice}</Feedback>
+      {!list && <Feedback kind="loading">Cargando {resource.title.toLowerCase()}…</Feedback>}
       {list?.error && (
         <div>
-          <p className="form-error" role="alert">{list.error}</p>
-          <button className="action secondary" type="button" onClick={reload}>Reintentar</button>
+          <Feedback kind="error">{list.error}</Feedback>
+          <Button variant="secondary" onClick={reload}>Reintentar</Button>
         </div>
       )}
-      {!editor && error && <p className="form-error" role="alert">{error}</p>}
+      {!editor && <Feedback kind="error">{error}</Feedback>}
       {editor?.mode === 'remove' && (
-        <section className="admin-editor" aria-label="Confirmar eliminación">
-          <h3>Eliminar {resource.singular}</h3>
+        <Confirmation
+          title={`Eliminar ${resource.singular}`}
+          confirmLabel="Confirmar eliminación"
+          busyLabel="Eliminando…"
+          busy={busy}
+          error={error}
+          onConfirm={() => save()}
+          onCancel={cancelEditor}
+        >
           <p>
             {resource.columns.map((column) => displayValue(column, editor.record, list.lookups)).slice(0, 2).join(' · ')}
           </p>
           <p>{resource.removeText ?? 'Confirma que quieres eliminar este registro.'}</p>
-          {error && <p className="form-error" role="alert">{error}</p>}
-          <div className="admin-actions">
-            <button className="action danger" type="button" disabled={busy} onClick={() => save()}>
-              {busy ? 'Eliminando…' : 'Confirmar eliminación'}
-            </button>
-            <button className="action secondary" type="button" disabled={busy} onClick={() => setEditor(null)}>Cancelar</button>
-          </div>
-        </section>
+        </Confirmation>
       )}
       {editor && editor.mode !== 'remove' && (
         <AdminForm
@@ -119,11 +132,11 @@ export default function AdminResource({ resource }) {
           title={`${editor.mode === 'create' ? 'Crear' : 'Editar'} ${resource.singular}`}
           saving={busy}
           error={error}
-          onCancel={() => { setEditor(null); setError('') }}
+          onCancel={cancelEditor}
           onSave={save}
         />
       )}
-      {list?.rows?.length === 0 && <p>Aún no hay registros.</p>}
+      {list?.rows?.length === 0 && <Feedback>Aún no hay registros.</Feedback>}
       {list?.rows?.length > 0 && (
         <div className="admin-table-scroll">
           <table className="admin-table" aria-labelledby="admin-resource-title">
@@ -140,13 +153,17 @@ export default function AdminResource({ resource }) {
                     <td key={column.name}>{displayValue(column, row, list.lookups)}</td>
                   ))}
                   <td>
-                    <div className="admin-actions">
-                      <button className="action secondary" type="button" disabled={busy || Boolean(editor)} onClick={() => edit(row)}>
+                    <div className="form-actions">
+                      <Button variant="secondary" disabled={actionsDisabled} onClick={(event) => edit(row, event.currentTarget)}>
                         Editar
-                      </button>
-                      <button className="action danger" type="button" disabled={busy || Boolean(editor) || row.accountStatus === 'DELETED'} onClick={() => openEditor('remove', row)}>
+                      </Button>
+                      <Button
+                        variant="danger"
+                        disabled={actionsDisabled || row.accountStatus === 'DELETED'}
+                        onClick={(event) => openEditor('remove', row, event.currentTarget)}
+                      >
                         Eliminar
-                      </button>
+                      </Button>
                     </div>
                   </td>
                 </tr>

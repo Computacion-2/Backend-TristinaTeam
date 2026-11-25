@@ -1,4 +1,5 @@
 import { Link, Navigate, Outlet, useLocation } from 'react-router'
+import Feedback from '../components/Feedback.jsx'
 import { hasAccess } from './access.js'
 import { useAuth } from './authContext.js'
 
@@ -6,7 +7,7 @@ export default function ProtectedRoute({ access }) {
   const { user, checkingSession } = useAuth()
   const { pathname, search, hash } = useLocation()
 
-  if (checkingSession) return <p role="status">Verificando tu sesión…</p>
+  if (checkingSession) return <Feedback kind="loading">Verificando tu sesión…</Feedback>
 
   if (!user) {
     return <Navigate to="/login" replace state={{ from: pathname + search + hash }} />

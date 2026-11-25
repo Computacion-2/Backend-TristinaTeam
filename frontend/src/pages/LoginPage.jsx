@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { Navigate, useLocation } from 'react-router'
 import { useAuth } from '../auth/authContext.js'
+import Button from '../components/Button.jsx'
+import Feedback from '../components/Feedback.jsx'
+import FormField from '../components/FormField.jsx'
 
 export default function LoginPage() {
   const { user, message, checkingSession, signIn } = useAuth()
@@ -11,7 +14,7 @@ export default function LoginPage() {
 
   useEffect(() => () => activeRequest.current?.abort(), [])
 
-  if (checkingSession) return <p role="status">Verificando tu sesión…</p>
+  if (checkingSession) return <Feedback kind="loading">Verificando tu sesión…</Feedback>
   if (user) return <Navigate to={state?.from || '/cuenta'} replace />
 
   async function handleSubmit(event) {
@@ -37,16 +40,12 @@ export default function LoginPage() {
   return (
     <section className="panel auth-panel">
       <h1>Iniciar sesión</h1>
-      {message && <p role="status">{message}</p>}
+      <Feedback>{message}</Feedback>
       <form className="login-form" onSubmit={handleSubmit}>
-        <label htmlFor="email">Correo electrónico</label>
-        <input id="email" name="email" type="email" autoComplete="username" maxLength={160} required />
-        <label htmlFor="password">Contraseña</label>
-        <input id="password" name="password" type="password" autoComplete="current-password" maxLength={72} required />
-        {error && <p className="form-error" role="alert">{error}</p>}
-        <button className="action" type="submit" disabled={submitting}>
-          {submitting ? 'Iniciando sesión…' : 'Ingresar'}
-        </button>
+        <FormField label="Correo electrónico" name="email" type="email" autoComplete="username" maxLength={160} required />
+        <FormField label="Contraseña" name="password" type="password" autoComplete="current-password" maxLength={72} required />
+        <Feedback kind="error">{error}</Feedback>
+        <Button type="submit" busy={submitting} busyLabel="Iniciando sesión…">Ingresar</Button>
       </form>
     </section>
   )
