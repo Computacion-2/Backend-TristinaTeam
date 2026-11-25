@@ -34,7 +34,7 @@ La cuenta y sus permisos se comprueban en la base de datos en cada petición.
 | Método y ruta | Acceso | Respuesta |
 | --- | --- | --- |
 | POST /api/v1/auth/login | Público | 200 con accessToken, tokenType, expiresAt, email y roles |
-| GET /api/v1/auth/me | Bearer JWT | 200 con email, roles y permissions actuales |
+| GET /api/v1/auth/me | Bearer JWT | 200 con userId, email, roles y permissions actuales |
 
 Login recibe JSON:
 ```json

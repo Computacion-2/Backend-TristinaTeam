@@ -2,6 +2,7 @@ package com.icesi.cuidapetproyect.api.controller;
 
 import com.icesi.cuidapetproyect.api.dto.*;
 import com.icesi.cuidapetproyect.api.security.JwtService;
+import com.icesi.cuidapetproyect.api.security.ResourceAccess;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.*;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
@@ -9,7 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.*;
 import org.springframework.security.authentication.*;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,10 +20,12 @@ import org.springframework.web.bind.annotation.*;
 public class ApiAuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final ResourceAccess access;
 
-    public ApiAuthController(AuthenticationManager authenticationManager, JwtService jwtService) {
+    public ApiAuthController(AuthenticationManager authenticationManager, JwtService jwtService, ResourceAccess access) {
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
+        this.access = access;
     }
 
     @PostMapping("/login")
@@ -46,7 +49,8 @@ public class ApiAuthController {
             @ApiResponse(responseCode = "200", description = "Usuario autenticado"),
             @ApiResponse(responseCode = "401", description = "Token ausente, inválido o vencido")
     })
-    public CurrentUserResponse me(@AuthenticationPrincipal UserDetails user) {
-        return JwtService.userInfo(user);
+    public CurrentUserResponse me(Authentication authentication) {
+        Long userId = access.currentUser(authentication).getId();
+        return JwtService.userInfo((UserDetails) authentication.getPrincipal(), userId);
     }
 }

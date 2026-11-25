@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 public class JwtService {
@@ -29,23 +30,31 @@ public class JwtService {
     public TokenResponse createToken(UserDetails user) {
         Instant issuedAt = Instant.now();
         Instant expiresAt = issuedAt.plus(expirationMinutes, ChronoUnit.MINUTES);
-        CurrentUserResponse info = userInfo(user);
+        List<String> roles = roles(user);
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer(JwtConfig.ISSUER).subject(user.getUsername())
                 .issuedAt(issuedAt).expiresAt(expiresAt)
-                .claim("email", info.email()).claim("roles", info.roles())
-                .claim("permissions", info.permissions()).build();
+                .claim("email", user.getUsername()).claim("roles", roles)
+                .claim("permissions", permissions(user)).build();
         String token = encoder.encode(JwtEncoderParameters.from(
                 JwsHeader.with(MacAlgorithm.HS256).build(), claims)).getTokenValue();
-        return new TokenResponse(token, "Bearer", expiresAt, user.getUsername(), info.roles());
+        return new TokenResponse(token, "Bearer", expiresAt, user.getUsername(), roles);
     }
 
-    public static CurrentUserResponse userInfo(UserDetails user) {
-        List<String> authorities = user.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority).sorted().toList();
-        return new CurrentUserResponse(user.getUsername(),
-                authorities.stream().filter(value -> value.startsWith("ROLE_"))
-                        .map(value -> value.substring(5)).toList(),
-                authorities.stream().filter(value -> !value.startsWith("ROLE_")).toList());
+    public static CurrentUserResponse userInfo(UserDetails user, Long userId) {
+        return new CurrentUserResponse(userId, user.getUsername(), roles(user), permissions(user));
+    }
+
+    private static List<String> roles(UserDetails user) {
+        return authorityNames(user).filter(value -> value.startsWith("ROLE_"))
+                .map(value -> value.substring(5)).toList();
+    }
+
+    private static List<String> permissions(UserDetails user) {
+        return authorityNames(user).filter(value -> !value.startsWith("ROLE_")).toList();
+    }
+
+    private static Stream<String> authorityNames(UserDetails user) {
+        return user.getAuthorities().stream().map(GrantedAuthority::getAuthority).sorted();
     }
 }
