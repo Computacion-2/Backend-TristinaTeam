@@ -11,7 +11,7 @@ Abre la URL que muestra Vite. La base incluye las rutas `/` y `/como-funciona` y
 
 ## API local
 
-Por defecto, Vite reenvía las peticiones a `/api/v1` a Spring Boot en `http://localhost:8080`. Para configurar otra dirección, copia `.env.example` a `.env.local` y ajusta `API_PROXY_TARGET`. Si el backend está en el contexto `/cuidapet`, configura `VITE_API_BASE_URL=/cuidapet/api/v1`. El proxy se usa en desarrollo. El build de producción se servirá con la configuración de Tomcat.
+Por defecto, Vite reenvía las peticiones a `/api/v1` a Spring Boot en `http://localhost:8080`. Para configurar otra dirección, copia `.env.example` a `.env.development.local` y ajusta `API_PROXY_TARGET`. Si el backend está en el contexto `/cuidapet`, configura `VITE_API_BASE_URL=/cuidapet/api/v1` en ese archivo. El proxy se usa en desarrollo.
 
 Arranca Spring Boot según la [guía del backend](../docs/DESPLIEGUE.md) cuando necesites utilizar la API.
 
@@ -34,3 +34,24 @@ La edición de un usuario conserva su contraseña si el campo queda vacío. Elim
 npm run lint
 npm run build
 ```
+
+## Despliegue en Tomcat
+
+Desde la raíz del repositorio, con Java 21 y Node.js configurados, genera las dos aplicaciones:
+
+```powershell
+mvn -DskipTests package
+npm --prefix frontend ci
+npm --prefix frontend run build
+jar --create --file target/cuidapet-front.war -C frontend/dist .
+```
+
+Despliega `target/cuidapet.war` y `target/cuidapet-front.war` en el directorio `webapps` de la misma instancia de Tomcat 11. Conserva los nombres de los WAR para que correspondan a los contextos `/cuidapet` y `/cuidapet-front`. En IAsLab, configura el proceso de Tomcat con el perfil `iaslab`, las variables de Oracle y `JWT_SECRET` según la [guía del backend](../docs/DESPLIEGUE.md).
+
+Abre `http://<servidor>:<puerto>/cuidapet-front/`. El build llama a `/cuidapet/api/v1` en el mismo origen, así que el navegador puede usar el API sin una política CORS adicional. Si creaste un archivo `.env.local` para cambiar el prefijo en desarrollo, mueve ese ajuste a `.env.development.local` antes de generar el WAR.
+
+1. Abre `/cuidapet-front/cuenta` sin sesión y comprueba la redirección al login dentro del mismo contexto.
+2. Inicia sesión con una cuenta activa. Confirma que vuelves a **Mi cuenta** y que recargar la página conserva la sesión.
+3. Con un administrador, abre y recarga `/cuidapet-front/administracion/usuarios`. Comprueba que aparezcan los datos de Spring Boot. Con un cuidador, la misma ruta debe mostrar **Acceso denegado**.
+
+La configuración de reescritura del WAR reenvía las rutas de navegación a React. Tomcat sirve los archivos estáticos directamente y mantiene el 404 para un recurso inexistente.

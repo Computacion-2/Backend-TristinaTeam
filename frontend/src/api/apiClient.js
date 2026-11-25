@@ -1,4 +1,5 @@
-const baseUrl = (import.meta.env.VITE_API_BASE_URL || '/api/v1').replace(/\/+$/, '')
+const defaultApiBase = import.meta.env.PROD ? '/cuidapet/api/v1' : '/api/v1'
+const baseUrl = (import.meta.env.VITE_API_BASE_URL || defaultApiBase).replace(/\/+$/, '')
 
 export class ApiError extends Error {
   constructor(message, status) {

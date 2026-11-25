@@ -108,6 +108,8 @@ El perfil `iaslab` permite obtener DB_URL, DB_USER y DB_PASSWORD del proceso que
 
 La [guía JWT](API_JWT.md) describe Swagger, Postman y la autenticación REST.
 
+Para desplegar la SPA en la misma instancia y verificar el acceso al API desde el navegador, sigue la [guía del frontend](../frontend/README.md#despliegue-en-tomcat).
+
 ## Problemas frecuentes
 
 - `release version 21 not supported`: Maven utiliza otro JDK; revisar JAVA_HOME y mvnw.cmd -version.
