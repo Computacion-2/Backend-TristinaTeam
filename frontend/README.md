@@ -41,6 +41,12 @@ En **Mi cuenta** puedes crear, editar y eliminar tu perfil. **Mis mascotas** lis
 
 Estas pantallas requieren el backend actualizado. El frontend obtiene el identificador de la cuenta desde `GET /api/v1/auth/me`, que devuelve `userId` junto con los datos de sesión. Spring Boot verifica la propiedad de los recursos.
 
+## Solicitudes de cuidado
+
+En **Mis solicitudes** puedes publicar solicitudes para tus mascotas activas, editar o cerrar las abiertas, o cancelarlas indicando el motivo. El presupuesto es opcional y las fechas se ingresan en la hora local del cuidado. Puedes eliminar una solicitud si no tiene una reserva.
+
+Desde la ficha puedes revisar tarifas, mensajes y estados de las postulaciones. Para aceptar una pendiente, ingresa la dirección exacta del cuidado. El API crea la reserva y el frontend vuelve a consultar la solicitud y las postulaciones para mostrar sus estados actualizados.
+
 ## Verificación
 
 ```bash

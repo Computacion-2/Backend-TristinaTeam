@@ -12,6 +12,8 @@ import AdminAccessPage from './pages/AdminAccessPage.jsx'
 import NotFoundPage from './pages/NotFoundPage.jsx'
 import PetPage from './pets/PetPage.jsx'
 import PetsPage from './pets/PetsPage.jsx'
+import RequestPage from './care/RequestPage.jsx'
+import RequestsPage from './care/RequestsPage.jsx'
 
 export default function App() {
   const { user, checkingSession, signOut } = useAuth()
@@ -34,6 +36,7 @@ export default function App() {
               <>
                 <NavLink to="/cuenta">Mi cuenta</NavLink>
                 <NavLink to="/mascotas">Mis mascotas</NavLink>
+                <NavLink to="/solicitudes">Mis solicitudes</NavLink>
                 <button className="nav-button" type="button" onClick={closeSession}>Cerrar sesión</button>
               </>
             )}
@@ -50,6 +53,8 @@ export default function App() {
             <Route path="/cuenta" element={<AccountPage />} />
             <Route path="/mascotas" element={<PetsPage />} />
             <Route path="/mascotas/:petId" element={<PetPage />} />
+            <Route path="/solicitudes" element={<RequestsPage />} />
+            <Route path="/solicitudes/:requestId" element={<RequestPage />} />
           </Route>
           <Route element={<ProtectedRoute access={administrationAccess} />}>
             <Route path="/administracion" element={<AdminAccessPage />}>

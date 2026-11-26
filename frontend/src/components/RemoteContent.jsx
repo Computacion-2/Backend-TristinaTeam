@@ -1,5 +1,5 @@
-import Button from '../components/Button.jsx'
-import Feedback from '../components/Feedback.jsx'
+import Button from './Button.jsx'
+import Feedback from './Feedback.jsx'
 
 export default function RemoteContent({ result, reload, loading, children }) {
   if (!result) return <Feedback kind="loading">{loading}</Feedback>
