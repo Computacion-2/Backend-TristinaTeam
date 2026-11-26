@@ -288,6 +288,11 @@ section.personal-section { padding-top: var(--space-5); border-top: 1px solid va
 .application-card { display: grid; align-content: start; gap: var(--space-2); }
 .application-card h3 { margin: 0; }
 .application-card p { white-space: pre-wrap; }
+.directory-views { margin-bottom: var(--space-4); }
+.caregiver-card { display: grid; align-content: start; gap: var(--space-2); }
+.caregiver-card h2, .caregiver-card h3, .caregiver-card ul { margin: 0; }
+.caregiver-card ul { padding-inline-start: var(--space-5); }
+.caregiver-bio { white-space: pre-wrap; }
 .photo-grid .record-card { display: grid; align-content: start; gap: var(--space-2); }
 .photo-grid img {
   display: block;

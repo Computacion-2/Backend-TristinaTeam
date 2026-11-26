@@ -1,6 +1,7 @@
 import Confirmation from '../components/Confirmation.jsx'
 import RecordForm from '../components/RecordForm.jsx'
-import { formatPrice, requestFormFields, toRequestForm, validateDates } from './requestDetails.js'
+import { formatCop } from '../formatters.js'
+import { requestFormFields, toRequestForm, validateDates } from './requestDetails.js'
 
 const decisionForms = {
   cancel: {
@@ -50,7 +51,7 @@ export default function RequestEditor({ editor, data, onSave }) {
   }
   return (
     <div>
-      {mode === 'accept' && <p>Cuidador #{record.caregiverId} · Tarifa {formatPrice(record.proposedRate)}</p>}
+      {mode === 'accept' && <p>Cuidador #{record.caregiverId} · Tarifa {formatCop(record.proposedRate)}</p>}
       <RecordForm {...common} title={title} fields={fields} validate={validateDecision} onSave={onSave} />
     </div>
   )

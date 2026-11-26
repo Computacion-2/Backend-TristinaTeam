@@ -4,11 +4,12 @@ import { useAuth } from '../auth/authContext.js'
 import Button from '../components/Button.jsx'
 import Feedback from '../components/Feedback.jsx'
 import RemoteContent from '../components/RemoteContent.jsx'
+import { formatCop } from '../formatters.js'
 import useEditor from '../hooks/useEditor.js'
 import useRemoteData from '../hooks/useRemoteData.js'
 import RequestApplications from './RequestApplications.jsx'
 import RequestEditor from './RequestEditor.jsx'
-import { formatDate, formatPrice, loadRequestCatalogs, requestStatuses, requestValues, toRequestForm } from './requestDetails.js'
+import { formatDate, loadRequestCatalogs, requestStatuses, requestValues, toRequestForm } from './requestDetails.js'
 
 export default function RequestPage() {
   const { requestId } = useParams()
@@ -105,7 +106,7 @@ function RequestDetail({ requestId }) {
                   ['Zona', careRequest.zoneName],
                   ['Referencia de ubicación', careRequest.addressReference],
                   ['Notas', careRequest.requestNotes],
-                  ['Presupuesto máximo', formatPrice(careRequest.maxBudget)],
+                  ['Presupuesto máximo', careRequest.maxBudget == null ? 'Sin límite indicado' : formatCop(careRequest.maxBudget)],
                   ['Motivo de cancelación', careRequest.cancellationReason],
                 ].filter(([, value]) => value).map(([label, value]) => (
                   <div key={label}><dt>{label}</dt><dd>{value}</dd></div>

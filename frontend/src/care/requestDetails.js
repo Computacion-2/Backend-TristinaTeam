@@ -21,14 +21,9 @@ export const bookingStatuses = {
 }
 
 const dateFormatter = new Intl.DateTimeFormat('es-CO', { dateStyle: 'medium', timeStyle: 'short' })
-const priceFormatter = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' })
 
 export function formatDate(date) {
   return dateFormatter.format(new Date(date))
-}
-
-export function formatPrice(amount) {
-  return amount == null ? 'Sin límite indicado' : priceFormatter.format(amount)
 }
 
 export async function loadRequestCatalogs(request, ownerId, signal) {
