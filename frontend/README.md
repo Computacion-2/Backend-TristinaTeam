@@ -47,6 +47,10 @@ En **Mis solicitudes** puedes publicar solicitudes para tus mascotas activas, ed
 
 Desde la ficha puedes revisar tarifas, mensajes y estados de las postulaciones. Para aceptar una pendiente, ingresa la dirección exacta del cuidado. El API crea la reserva y el frontend vuelve a consultar la solicitud y las postulaciones para mostrar sus estados actualizados.
 
+## Directorio de cuidadores
+
+En **Cuidadores** puedes consultar perfiles, ciudad, experiencia, servicios activos y tarifas en COP. **Mis favoritos** muestra los cuidadores guardados por tu cuenta. Si un perfil deja de estar visible en el directorio, puedes quitarlo de favoritos desde esa vista.
+
 ## Verificación
 
 ```bash

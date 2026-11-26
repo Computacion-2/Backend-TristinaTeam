@@ -1,5 +1,6 @@
 import Button from '../components/Button.jsx'
-import { applicationStatuses, bookingStatuses, formatPrice } from './requestDetails.js'
+import { formatCop } from '../formatters.js'
+import { applicationStatuses, bookingStatuses } from './requestDetails.js'
 
 export default function RequestApplications({ applications, booking, open, canAccept, editing, onDecision }) {
   return (
@@ -11,7 +12,7 @@ export default function RequestApplications({ applications, booking, open, canAc
             {applications.map((application) => (
               <li className="record-card application-card" key={application.id}>
                 <h3>Cuidador #{application.caregiverId}</h3>
-                <p>{applicationStatuses[application.applicationStatus] ?? application.applicationStatus} · {formatPrice(application.proposedRate)}</p>
+                <p>{applicationStatuses[application.applicationStatus] ?? application.applicationStatus} · {formatCop(application.proposedRate)}</p>
                 {application.applicationMessage && <p>{application.applicationMessage}</p>}
                 {application.responseReason && <p>Motivo: {application.responseReason}</p>}
                 {open && application.applicationStatus === 'PENDING' && (
@@ -31,7 +32,7 @@ export default function RequestApplications({ applications, booking, open, canAc
           <dl className="account-info personal-details">
             <div><dt>Estado</dt><dd>{bookingStatuses[booking.bookingStatusCode] ?? booking.bookingStatusCode}</dd></div>
             <div><dt>Cuidador</dt><dd>#{booking.caregiverId}</dd></div>
-            <div><dt>Tarifa acordada</dt><dd>{formatPrice(booking.agreedRate)}</dd></div>
+            <div><dt>Tarifa acordada</dt><dd>{formatCop(booking.agreedRate)}</dd></div>
             <div><dt>Dirección exacta</dt><dd>{booking.exactAddress}</dd></div>
           </dl>
         </section>
