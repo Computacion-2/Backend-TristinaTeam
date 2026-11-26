@@ -1,10 +1,11 @@
-import { useEffect, useRef } from 'react'
-import Button from '../components/Button.jsx'
-import Feedback from '../components/Feedback.jsx'
-import FormField from '../components/FormField.jsx'
+import { useEffect, useRef, useState } from 'react'
+import Button from './Button.jsx'
+import Feedback from './Feedback.jsx'
+import FormField from './FormField.jsx'
 
-export default function RecordForm({ title, fields, record = {}, busy, error, onCancel, onSave }) {
+export default function RecordForm({ title, fields, record = {}, busy, error, validate, onCancel, onSave }) {
   const heading = useRef(null)
+  const [validation, setValidation] = useState('')
   useEffect(() => heading.current?.focus(), [])
 
   function handleSubmit(event) {
@@ -14,7 +15,9 @@ export default function RecordForm({ title, fields, record = {}, busy, error, on
       const value = values.get(name).trim()
       return [name, value === '' ? null : numeric ? Number(value) : value]
     }))
-    onSave(payload)
+    const problem = validate?.(payload) ?? ''
+    setValidation(problem)
+    if (!problem) onSave(payload)
   }
 
   return (
@@ -30,7 +33,7 @@ export default function RecordForm({ title, fields, record = {}, busy, error, on
           )
         })}
       </fieldset>
-      <Feedback kind="error">{error}</Feedback>
+      <Feedback kind="error">{validation || error}</Feedback>
       <div className="form-actions">
         <Button type="submit" busy={busy} busyLabel="Guardando…">Guardar</Button>
         <Button variant="secondary" disabled={busy} onClick={onCancel}>Cancelar</Button>

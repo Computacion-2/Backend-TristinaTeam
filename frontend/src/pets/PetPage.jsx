@@ -6,10 +6,10 @@ import Confirmation from '../components/Confirmation.jsx'
 import Feedback from '../components/Feedback.jsx'
 import { petFields, petSexes, petStatuses } from './fields.js'
 import PhotoGallery from './PhotoGallery.jsx'
-import RecordForm from './RecordForm.jsx'
-import RemoteContent from './RemoteContent.jsx'
-import useEditor from './useEditor.js'
-import useRemoteData from './useRemoteData.js'
+import RecordForm from '../components/RecordForm.jsx'
+import RemoteContent from '../components/RemoteContent.jsx'
+import useEditor from '../hooks/useEditor.js'
+import useRemoteData from '../hooks/useRemoteData.js'
 
 export default function PetPage() {
   const { petId } = useParams()

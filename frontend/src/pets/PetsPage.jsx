@@ -4,10 +4,10 @@ import { useAuth } from '../auth/authContext.js'
 import Button from '../components/Button.jsx'
 import Feedback from '../components/Feedback.jsx'
 import { petFields, petStatuses } from './fields.js'
-import RecordForm from './RecordForm.jsx'
-import RemoteContent from './RemoteContent.jsx'
-import useEditor from './useEditor.js'
-import useRemoteData from './useRemoteData.js'
+import RecordForm from '../components/RecordForm.jsx'
+import RemoteContent from '../components/RemoteContent.jsx'
+import useEditor from '../hooks/useEditor.js'
+import useRemoteData from '../hooks/useRemoteData.js'
 
 export default function PetsPage() {
   const { user, request } = useAuth()
