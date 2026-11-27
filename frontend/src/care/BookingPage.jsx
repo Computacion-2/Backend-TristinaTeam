@@ -9,6 +9,7 @@ import useEditor from '../hooks/useEditor.js'
 import useRemoteData from '../hooks/useRemoteData.js'
 import { formatCop } from '../formatters.js'
 import { bookingStatuses, formatDate } from './requestDetails.js'
+import BookingFeedback from './BookingFeedback.jsx'
 
 const statusFields = [
   { name: 'cancellationReason', label: 'Motivo de cancelación', as: 'textarea', rows: 3, maxLength: 500, required: true },
@@ -171,6 +172,8 @@ function BookingDetail({ bookingId }) {
                   onCancel={updateEditor.close} onSave={saveUpdate} />}
                 {caregiver && !canTrack && <p>Las novedades se pueden publicar mientras la reserva está en curso o pendiente de confirmación.</p>}
               </section>
+
+              <BookingFeedback booking={booking} />
 
             </>
           )

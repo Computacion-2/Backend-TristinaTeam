@@ -295,6 +295,12 @@ section.personal-section { padding-top: var(--space-5); border-top: 1px solid va
 .caregiver-card ul { padding-inline-start: var(--space-5); }
 .caregiver-bio { white-space: pre-wrap; }
 .muted-text { color: var(--color-muted); font-size: 0.9rem; }
+.notification-card { display: grid; align-content: start; gap: var(--space-2); }
+.notification-card h2 { margin: 0; font-size: 1.15rem; }
+.notification-card p { margin: 0; }
+.notification-heading { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); }
+.notification-heading span { flex: none; color: var(--color-muted); font-size: 0.875rem; }
+.notification-read { background: var(--color-surface); }
 .update-card { display: grid; align-content: start; gap: var(--space-2); }
 .photo-gallery-inline { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr)); gap: var(--space-2); }
 .photo-gallery-inline img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--radius-control); background: var(--color-secondary); }

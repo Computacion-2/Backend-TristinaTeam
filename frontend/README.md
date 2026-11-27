@@ -51,6 +51,18 @@ Desde la ficha puedes revisar tarifas, mensajes y estados de las postulaciones. 
 
 En **Cuidadores** puedes consultar perfiles, ciudad, experiencia, servicios activos y tarifas en COP. **Mis favoritos** muestra los cuidadores guardados por tu cuenta. Si un perfil deja de estar visible en el directorio, puedes quitarlo de favoritos desde esa vista.
 
+## Panel del cuidador y postulaciones
+
+Las cuentas con rol **CAREGIVER** tienen acceso a **Panel del cuidador**, donde crean o editan su perfil, pausan su visibilidad, mantienen horarios semanales y configuran servicios y tarifas. **Solicitudes abiertas** muestra las solicitudes que pueden consultar; en el detalle se envía, edita o retira una postulación pendiente. **Mis postulaciones** conserva el estado y las respuestas del propietario. El panel y sus rutas están protegidos por rol.
+
+## Reservas, novedades e incidentes
+
+Propietarios y cuidadores consultan **Mis reservas** y el mismo detalle de cada reserva. El cuidador puede iniciar el cuidado, publicar novedades y adjuntar fotos; el propietario confirma su finalización. Ambos pueden cancelar con un motivo. El detalle también permite reportar un incidente asociado a esa reserva, consultar los reportes propios y dejar o editar una reseña cuando el cuidado queda completado.
+
+## Notificaciones
+
+La bandeja **Notificaciones** consulta los avisos de la cuenta y permite marcarlos como leídos o volverlos a dejar sin leer. Las notificaciones automáticas de reservas, novedades, incidentes y reseñas se muestran desde el mismo API.
+
 ## Verificación
 
 ```bash

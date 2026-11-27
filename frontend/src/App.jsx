@@ -21,6 +21,7 @@ import OpenRequestPage from './care/OpenRequestPage.jsx'
 import ApplicationsPage from './care/ApplicationsPage.jsx'
 import BookingsPage from './care/BookingsPage.jsx'
 import BookingPage from './care/BookingPage.jsx'
+import NotificationsPage from './care/NotificationsPage.jsx'
 
 export default function App() {
   const { user, checkingSession, signOut } = useAuth()
@@ -50,6 +51,7 @@ export default function App() {
                   </>
                 )}
                 {(user.roles.includes('OWNER') || user.roles.includes('CAREGIVER')) && <NavLink to="/reservas">Mis reservas</NavLink>}
+                <NavLink to="/notificaciones">Notificaciones</NavLink>
                 {user.roles.includes('CAREGIVER') && (
                   <>
                     <NavLink to="/panel-cuidador">Panel del cuidador</NavLink>
@@ -71,6 +73,7 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route element={<ProtectedRoute />}>
             <Route path="/cuenta" element={<AccountPage />} />
+            <Route path="/notificaciones" element={<NotificationsPage />} />
           </Route>
           <Route element={<ProtectedRoute access={ownerAccess} />}>
             <Route path="/mascotas" element={<PetsPage />} />
