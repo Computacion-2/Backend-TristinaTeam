@@ -19,6 +19,7 @@ export default function AccountPage() {
         <dd>{user.roles.map((role) => roleNames[role] || role).join(', ') || 'Sin roles asignados'}</dd>
       </dl>
       {canAdminister && <Link className="action" to="/administracion">Administración</Link>}
+      {user.roles.includes('CAREGIVER') && <Link className="action account-action" to="/panel-cuidador">Panel del cuidador</Link>}
       <ProfilePanel />
     </section>
   )

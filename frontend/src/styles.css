@@ -215,6 +215,7 @@ textarea.form-control { resize: vertical; }
 .action.secondary:hover { background: var(--color-secondary-hover); }
 .action.danger { background: var(--color-danger); }
 .action.danger:hover { background: var(--color-danger-hover); }
+.account-action { margin-left: var(--space-3); }
 
 .form-panel {
   display: grid;
