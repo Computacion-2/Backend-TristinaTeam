@@ -1,7 +1,7 @@
 import { Navigate, NavLink, Route, Routes, useNavigate } from 'react-router'
 import AdminResource from './admin/AdminResource.jsx'
 import { adminResources } from './admin/resources.js'
-import { administrationAccess, caregiverAccess } from './auth/access.js'
+import { administrationAccess, caregiverAccess, ownerAccess } from './auth/access.js'
 import { useAuth } from './auth/authContext.js'
 import ProtectedRoute from './auth/ProtectedRoute.jsx'
 import HomePage from './pages/HomePage.jsx'
@@ -16,6 +16,9 @@ import RequestPage from './care/RequestPage.jsx'
 import RequestsPage from './care/RequestsPage.jsx'
 import CaregiversPage from './caregivers/CaregiversPage.jsx'
 import CaregiverPanelPage from './caregivers/CaregiverPanelPage.jsx'
+import OpenRequestsPage from './care/OpenRequestsPage.jsx'
+import OpenRequestPage from './care/OpenRequestPage.jsx'
+import ApplicationsPage from './care/ApplicationsPage.jsx'
 
 export default function App() {
   const { user, checkingSession, signOut } = useAuth()
@@ -45,7 +48,11 @@ export default function App() {
                   </>
                 )}
                 {user.roles.includes('CAREGIVER') && (
-                  <NavLink to="/panel-cuidador">Panel del cuidador</NavLink>
+                  <>
+                    <NavLink to="/panel-cuidador">Panel del cuidador</NavLink>
+                    <NavLink to="/solicitudes-abiertas">Solicitudes abiertas</NavLink>
+                    <NavLink to="/mis-postulaciones">Mis postulaciones</NavLink>
+                  </>
                 )}
                 <button className="nav-button" type="button" onClick={closeSession}>Cerrar sesión</button>
               </>
@@ -61,6 +68,8 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route element={<ProtectedRoute />}>
             <Route path="/cuenta" element={<AccountPage />} />
+          </Route>
+          <Route element={<ProtectedRoute access={ownerAccess} />}>
             <Route path="/mascotas" element={<PetsPage />} />
             <Route path="/mascotas/:petId" element={<PetPage />} />
             <Route path="/solicitudes" element={<RequestsPage />} />
@@ -69,6 +78,9 @@ export default function App() {
           </Route>
           <Route element={<ProtectedRoute access={caregiverAccess} />}>
             <Route path="/panel-cuidador" element={<CaregiverPanelPage />} />
+            <Route path="/solicitudes-abiertas" element={<OpenRequestsPage />} />
+            <Route path="/solicitudes-abiertas/:requestId" element={<OpenRequestPage />} />
+            <Route path="/mis-postulaciones" element={<ApplicationsPage />} />
           </Route>
           <Route element={<ProtectedRoute access={administrationAccess} />}>
             <Route path="/administracion" element={<AdminAccessPage />}>
