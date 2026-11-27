@@ -5,6 +5,7 @@ export const administrationAccess = {
 
 export const caregiverAccess = { roles: ['CAREGIVER'] }
 export const ownerAccess = { roles: ['OWNER'] }
+export const careParticipantAccess = { roles: ['OWNER', 'CAREGIVER'] }
 
 export function hasAccess(user, { roles = [], permissions = [] } = {}) {
   const hasRole = roles.length === 0 || roles.some((role) => user.roles.includes(role))

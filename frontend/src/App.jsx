@@ -1,7 +1,7 @@
 import { Navigate, NavLink, Route, Routes, useNavigate } from 'react-router'
 import AdminResource from './admin/AdminResource.jsx'
 import { adminResources } from './admin/resources.js'
-import { administrationAccess, caregiverAccess, ownerAccess } from './auth/access.js'
+import { administrationAccess, caregiverAccess, careParticipantAccess, ownerAccess } from './auth/access.js'
 import { useAuth } from './auth/authContext.js'
 import ProtectedRoute from './auth/ProtectedRoute.jsx'
 import HomePage from './pages/HomePage.jsx'
@@ -19,6 +19,8 @@ import CaregiverPanelPage from './caregivers/CaregiverPanelPage.jsx'
 import OpenRequestsPage from './care/OpenRequestsPage.jsx'
 import OpenRequestPage from './care/OpenRequestPage.jsx'
 import ApplicationsPage from './care/ApplicationsPage.jsx'
+import BookingsPage from './care/BookingsPage.jsx'
+import BookingPage from './care/BookingPage.jsx'
 
 export default function App() {
   const { user, checkingSession, signOut } = useAuth()
@@ -47,6 +49,7 @@ export default function App() {
                     <NavLink to="/cuidadores">Cuidadores</NavLink>
                   </>
                 )}
+                {(user.roles.includes('OWNER') || user.roles.includes('CAREGIVER')) && <NavLink to="/reservas">Mis reservas</NavLink>}
                 {user.roles.includes('CAREGIVER') && (
                   <>
                     <NavLink to="/panel-cuidador">Panel del cuidador</NavLink>
@@ -81,6 +84,10 @@ export default function App() {
             <Route path="/solicitudes-abiertas" element={<OpenRequestsPage />} />
             <Route path="/solicitudes-abiertas/:requestId" element={<OpenRequestPage />} />
             <Route path="/mis-postulaciones" element={<ApplicationsPage />} />
+          </Route>
+          <Route element={<ProtectedRoute access={careParticipantAccess} />}>
+            <Route path="/reservas" element={<BookingsPage />} />
+            <Route path="/reservas/:bookingId" element={<BookingPage />} />
           </Route>
           <Route element={<ProtectedRoute access={administrationAccess} />}>
             <Route path="/administracion" element={<AdminAccessPage />}>
